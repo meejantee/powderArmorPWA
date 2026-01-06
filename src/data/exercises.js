@@ -3,6 +3,7 @@ export const EXERCISES = {
   legBlaster: {
     name: "Leg Blaster Complex",
     description: "20 Squats, 20 Lunges (10/leg), 10 Jump Squats, 10 Jump Lunges.",
+    image: "leg-blaster.gif",
     progression: {
       week1: {
         weight: "Bodyweight",
@@ -27,6 +28,7 @@ export const EXERCISES = {
     name: "Single-Leg RDL",
     description: "Hinge at hips. Keep back flat like a table. No rounding.",
     reps: "12 per leg",
+    image: "single-leg-rdl.gif",
     progression: {
       week1: {
         weight: "Bodyweight",
@@ -50,6 +52,7 @@ export const EXERCISES = {
     name: "Wall Sit",
     description: "Knees at 90 degrees. Press lower back into the wall.",
     time: 60,
+    image: "wall-sit.gif",
     progression: {
       week1: {
         weight: "Bodyweight",
@@ -72,6 +75,7 @@ export const EXERCISES = {
   core: {
     name: "Core Anti-Rotation",
     description: "Imagine a glass of water on your lower back. Don't spill it.",
+    image: "core-plank.gif",
     progression: {
       week1: {
         variant: "Shoulder Taps",
@@ -103,6 +107,7 @@ export const EXERCISES = {
     name: "Dead Hang",
     description: "Decompress Spine. Relax shoulders.",
     time: 60,
+    image: "dead-hang.gif",
     progression: {
       all: {
         weight: "Bodyweight",
@@ -113,15 +118,15 @@ export const EXERCISES = {
 };
 
 export const WARMUP = [
-  { name: "Joint Rotations", note: "Wrists, Ankles, Neck" },
-  { name: "Cat-Cow", note: "Mobilize spine gently" },
-  { name: "Glute Bridges", note: "10 reps, squeeze top" },
-  { name: "High Knees", note: "20 seconds, light impact" }
+  { name: "Joint Rotations", instruction: "Wrists, Ankles, Neck", time: 30, type: 'warmup', image: "joint-rotations.gif" },
+  { name: "Cat-Cow", instruction: "Mobilize spine gently", reps: "10 reps", type: 'warmup', image: "cat-cow.gif" },
+  { name: "Glute Bridges", instruction: "Squeeze at top", reps: "10 reps", type: 'warmup', image: "glute-bridges.gif" },
+  { name: "High Knees", instruction: "Light impact", time: 20, type: 'warmup', image: "high-knees.gif" }
 ];
 
 export const COOLDOWN = [
-  { name: "Figure-4 Stretch", note: "Glutes" },
-  { name: "Lunge Stretch", note: "Hip Flexors" },
-  { name: "Child's Pose", note: "Lower Back" },
-  { name: "Doorway Stretch", note: "Chest/Pec" }
+  { name: "Figure-4 Stretch", instruction: "Glutes", time: 30, type: 'cooldown', image: "figure-4.gif" },
+  { name: "Lunge Stretch", instruction: "Hip Flexors", time: 30, type: 'cooldown', image: "lunge-stretch.gif" },
+  { name: "Child's Pose", instruction: "Lower Back", time: 45, type: 'cooldown', image: "childs-pose.gif" },
+  { name: "Doorway Stretch", instruction: "Chest/Pec", time: 30, type: 'cooldown', image: "doorway-stretch.gif" }
 ];
