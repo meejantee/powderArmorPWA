@@ -16,8 +16,7 @@ function App() {
   }
 
   if (state.hasCompletedProgram && daysUntilTrip > 0 && view !== 'player') {
-     if (view !== 'dashboard') {
-     }
+     // Logic for taper screen redirection could go here if needed
   }
 
   const startDay = (day) => {

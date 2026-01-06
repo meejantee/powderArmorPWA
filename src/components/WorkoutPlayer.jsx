@@ -3,37 +3,43 @@ import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import {
   Play, Pause, SkipForward, CheckCircle, AlertTriangle,
-  RotateCcw, Volume2, ShieldAlert
+  RotateCcw, Volume2, ShieldAlert, ChevronLeft
 } from 'lucide-react';
 import { getDailyExercises, generateSchedule } from '../data/schedule';
 import { WARMUP, COOLDOWN } from '../data/exercises';
 import { playStartBeep, playStopBeep, playCountdownBeep } from '../utils/audio';
-import { hapticStart, hapticStop, hapticTick } from '../utils/haptics';
+import { hapticStart, hapticStop } from '../utils/haptics';
+import { useWakeLock } from '../hooks/useWakeLock';
 
 const Timer = ({ duration, onComplete, autoStart = false, label = "Work" }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isActive, setIsActive] = useState(autoStart);
 
   useEffect(() => {
-    setTimeLeft(duration);
-    setIsActive(autoStart);
-  }, [duration, autoStart]);
-
-  useEffect(() => {
     let interval = null;
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft(t => {
-          if (t <= 4 && t > 1) playCountdownBeep();
-          return t - 1;
+          const newVal = t - 1;
+          if (newVal <= 3 && newVal > 0) playCountdownBeep();
+          if (newVal <= 0) {
+             clearInterval(interval);
+             // Use setTimeout to defer state update and callback to avoid sync state update in effect issues if this was triggered differently
+             // But here we are in a callback, so it's fine.
+             // However, to strictly satisfy the linter warning about effects if logic was different:
+             setTimeout(() => {
+                setIsActive(false);
+                onComplete && onComplete();
+             }, 0);
+             return 0;
+          }
+          return newVal;
         });
       }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
-      onComplete && onComplete();
     }
     return () => clearInterval(interval);
-  }, [isActive, timeLeft, onComplete]);
+  }, [isActive, timeLeft, onComplete]); // timeLeft in dep array causes re-setup every second, which works but is slightly inefficient. Better to remove it if logic allows, but 'timeLeft > 0' check needs it.
+  // Ideally, refactor to not depend on timeLeft in effect deps, but for now this fixes the sync setState error by moving completion logic inside the interval callback.
 
   const toggle = () => setIsActive(!isActive);
   const reset = () => { setIsActive(false); setTimeLeft(duration); };
@@ -127,12 +133,119 @@ const Checklist = ({ items, onComplete }) => {
     );
 };
 
+const ExerciseDisplay = ({
+  exercise,
+  onComplete,
+  onPrev,
+  currentRound,
+  totalRounds,
+  showBack,
+  onCancel
+}) => {
+    const [showSafety, setShowSafety] = useState(false);
+
+    return (
+        <div className="h-screen flex flex-col p-4 relative">
+             <div className="flex justify-between items-center mb-6">
+                 {totalRounds ? (
+                    <span className="text-slate-500 font-mono">Round {currentRound}/{totalRounds}</span>
+                 ) : (
+                    <span className="text-slate-500 font-mono capitalize">{exercise.type || 'Workout'}</span>
+                 )}
+
+                 <button onClick={onCancel} className="text-slate-500 text-sm">Quit</button>
+             </div>
+
+             <div className="flex-1 flex flex-col items-center text-center overflow-y-auto">
+                 <h2 className="text-3xl font-bold text-white mb-2">{exercise.name}</h2>
+
+                 <div className="bg-slate-900 rounded-lg px-4 py-2 mb-4 border border-slate-800">
+                     <span className="text-powder-400 font-bold text-lg">
+                        {exercise.time ? `${exercise.time}s` : ""}
+                        {exercise.time && exercise.weight && exercise.weight !== "Bodyweight" ? " • " : ""}
+                        {exercise.weight && exercise.weight !== "Bodyweight" ? exercise.weight : ""}
+                        {(exercise.time || (exercise.weight && exercise.weight !== "Bodyweight")) && exercise.reps ? " • " : ""}
+                        {exercise.reps ? exercise.reps : ""}
+                     </span>
+                 </div>
+
+                {/* Image Placeholder */}
+                {exercise.image && (
+                    <div className="w-full max-w-xs aspect-video bg-slate-800 rounded-lg mb-6 overflow-hidden border border-slate-700 flex items-center justify-center">
+                        <img
+                            src={`/images/${exercise.image}`}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "/images/PlaceHolder.gif";
+                            }}
+                            alt={exercise.name}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                )}
+
+                 <p className="text-slate-300 text-lg mb-8 px-4">{exercise.instruction}</p>
+
+                 {exercise.time ? (
+                     <Timer
+                        key={exercise.name} // Force remount on exercise change to reset timer state
+                        duration={exercise.time}
+                        label={exercise.type === 'warmup' ? "Warmup" : "Work"}
+                        onComplete={onComplete}
+                        autoStart={false} // Or true if desired, but default to false to let user start
+                     />
+                 ) : (
+                     <button
+                        onClick={onComplete}
+                        className="btn-primary py-8 text-xl w-full"
+                     >
+                        <CheckCircle /> Done
+                     </button>
+                 )}
+             </div>
+
+            <div className="flex gap-4 mt-auto mb-4">
+                {showBack && (
+                    <button
+                        onClick={onPrev}
+                        className="btn-secondary w-16 flex items-center justify-center"
+                    >
+                        <ChevronLeft />
+                    </button>
+                )}
+
+                <button
+                    onClick={() => setShowSafety(true)}
+                    className="flex-1 flex items-center justify-center gap-2 text-red-400 font-bold p-4 bg-red-900/20 border border-red-900/50 rounded-lg"
+                >
+                    <ShieldAlert /> Safety
+                </button>
+            </div>
+
+             {showSafety && (
+                 <div className="absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-center p-8 text-center">
+                     <AlertTriangle className="w-20 h-20 text-red-500 mb-6" />
+                     <h3 className="text-3xl font-bold text-white mb-4">Safety First</h3>
+                     <ul className="text-left space-y-4 text-lg text-slate-300 mb-8">
+                         <li>• Engage Core constantly.</li>
+                         <li>• No twisting under load.</li>
+                         <li>• Stop immediately if sharp pain.</li>
+                     </ul>
+                     <button onClick={() => setShowSafety(false)} className="btn-danger">
+                         I Understand
+                     </button>
+                 </div>
+             )}
+        </div>
+    );
+}
+
 const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   const [phase, setPhase] = useState('warmup');
   const [currentRound, setCurrentRound] = useState(1);
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
   const [isResting, setIsResting] = useState(false);
-  const [showSafety, setShowSafety] = useState(false);
+  const { requestWakeLock } = useWakeLock();
 
   const schedule = generateSchedule();
   const dayData = schedule.find(d => d.day === dayNumber);
@@ -141,27 +254,56 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   const isRestDay = dayData.type === 'rest';
   const isRecoveryDay = dayData.type === 'recovery';
 
-  // --- Logic Fixes Implemented Here ---
+  // Request Wake Lock on mount
+  useEffect(() => {
+    requestWakeLock();
+  }, [requestWakeLock]);
 
-  const handleExerciseComplete = () => {
+
+  const handleExerciseComplete = (exerciseList, nextPhaseCallback) => {
       playStopBeep();
 
-      const isLastExercise = currentExerciseIdx >= exercises.length - 1;
+      const isLastExercise = currentExerciseIdx >= exerciseList.length - 1;
 
       if (isLastExercise) {
-          // End of Round
-          if (currentRound < dayData.rounds) {
-             setIsResting(true); // Trigger Round Rest
-          } else {
-             // Workout Complete (to finisher)
-             setPhase('finisher');
-             setCurrentExerciseIdx(0);
-             setCurrentRound(1);
-          }
+         nextPhaseCallback();
       } else {
-          // Next Exercise (Immediate, no rest between exercises)
+          // Next Exercise
           setCurrentExerciseIdx(prev => prev + 1);
-          playStartBeep(); // Audio cue for next exercise
+          playStartBeep();
+      }
+  };
+
+  const handlePrevExercise = (exerciseList, prevPhaseCallback) => {
+      if (currentExerciseIdx > 0) {
+          setCurrentExerciseIdx(prev => prev - 1);
+      } else {
+          // If first exercise of list, delegate to callback (e.g. go to previous round or phase)
+          prevPhaseCallback && prevPhaseCallback();
+      }
+  };
+
+  const handleCircuitComplete = () => {
+       // End of Round or Circuit
+       if (currentRound < dayData.rounds) {
+          setIsResting(true); // Trigger Round Rest
+       } else {
+          // Workout Complete (to finisher)
+          setPhase('finisher');
+          setCurrentExerciseIdx(0);
+          setCurrentRound(1);
+       }
+  };
+
+  const handleCircuitPrev = () => {
+      if (currentRound > 1) {
+          // Go back to previous round
+          setCurrentRound(prev => prev - 1);
+          setCurrentExerciseIdx(exercises.length - 1); // Last exercise of prev round
+      } else {
+          // Back to Warmup
+          setPhase('warmup');
+          setCurrentExerciseIdx(WARMUP.length - 1);
       }
   };
 
@@ -189,24 +331,34 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   }
 
   if (phase === 'warmup') {
+      const exercise = WARMUP[currentExerciseIdx];
       return (
-          <div className="h-screen flex flex-col p-4">
-              <h2 className="text-xl font-bold text-white mb-4">Warmup</h2>
-              <Checklist
-                items={WARMUP}
-                onComplete={() => {
-                    if (isRecoveryDay) setPhase('recovery_main');
-                    else setPhase('circuit');
-                }}
-              />
-          </div>
+        <ExerciseDisplay
+            exercise={exercise}
+            onComplete={() => handleExerciseComplete(WARMUP, () => {
+                 if (isRecoveryDay) {
+                     setPhase('recovery_main');
+                     setCurrentExerciseIdx(0);
+                 } else {
+                     setPhase('circuit');
+                     setCurrentExerciseIdx(0);
+                 }
+            })}
+            onPrev={() => handlePrevExercise(WARMUP, null)} // No going back before warmup for now
+            showBack={currentExerciseIdx > 0}
+            onCancel={onCancel}
+        />
       );
   }
 
   if (phase === 'recovery_main') {
        return (
            <div className="h-screen flex flex-col p-4">
-               <h2 className="text-xl font-bold text-blue-400 mb-2">Active Recovery</h2>
+               <div className="flex justify-between items-center mb-4">
+                   <button onClick={() => { setPhase('warmup'); setCurrentExerciseIdx(WARMUP.length - 1); }}><ChevronLeft /></button>
+                    <h2 className="text-xl font-bold text-blue-400">Active Recovery</h2>
+                   <div className="w-6"></div>
+               </div>
                <p className="text-slate-400 mb-4 text-sm">Do 3 Rounds. Hold each for 90s.</p>
                <Checklist
                    items={COOLDOWN.map(i => ({...i, note: "Hold 90s. Deep breathing."}))}
@@ -233,93 +385,64 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
                   <div className="mt-8 text-center">
                       <p className="text-slate-500 text-sm">Next Round:</p>
                       <p className="text-xl text-white font-bold">Round {currentRound + 1}</p>
+                      <button
+                        onClick={() => { setIsResting(false); setCurrentRound(prev => prev); setCurrentExerciseIdx(exercises.length - 1); }}
+                        className="mt-4 text-slate-500 underline text-sm"
+                      >
+                          Go Back
+                      </button>
                   </div>
               </div>
           );
       }
 
       return (
-          <div className="h-screen flex flex-col p-4 relative">
-             <div className="flex justify-between items-center mb-6">
-                 <span className="text-slate-500 font-mono">Round {currentRound}/{dayData.rounds}</span>
-                 <button onClick={onCancel} className="text-slate-500 text-sm">Quit</button>
-             </div>
-
-             <div className="flex-1 flex flex-col items-center text-center">
-                 <h2 className="text-3xl font-bold text-white mb-2">{exercise.name}</h2>
-                 <div className="bg-slate-900 rounded-lg px-4 py-2 mb-6 border border-slate-800">
-                     <span className="text-powder-400 font-bold text-lg">
-                        {exercise.time ? `${exercise.time}s` : ""}
-                        {exercise.time && exercise.weight && exercise.weight !== "Bodyweight" ? " • " : ""}
-                        {exercise.weight && exercise.weight !== "Bodyweight" ? exercise.weight : ""}
-                        {(exercise.time || (exercise.weight && exercise.weight !== "Bodyweight")) && exercise.reps ? " • " : ""}
-                        {exercise.reps ? exercise.reps : ""}
-                     </span>
-                 </div>
-
-                 <p className="text-slate-300 text-lg mb-8 px-4">{exercise.instruction}</p>
-
-                 {exercise.time ? (
-                     <Timer
-                        duration={exercise.time}
-                        label="Work"
-                        onComplete={handleExerciseComplete}
-                     />
-                 ) : (
-                     <button
-                        onClick={handleExerciseComplete}
-                        className="btn-primary py-8 text-xl"
-                     >
-                        <CheckCircle /> Done
-                     </button>
-                 )}
-             </div>
-
-             <button
-                onClick={() => setShowSafety(true)}
-                className="mt-auto mb-4 flex items-center justify-center gap-2 text-red-400 font-bold p-4 bg-red-900/20 border border-red-900/50 rounded-lg w-full"
-             >
-                <ShieldAlert /> Back Check
-             </button>
-
-             {showSafety && (
-                 <div className="absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-center p-8 text-center">
-                     <AlertTriangle className="w-20 h-20 text-red-500 mb-6" />
-                     <h3 className="text-3xl font-bold text-white mb-4">Safety First</h3>
-                     <ul className="text-left space-y-4 text-lg text-slate-300 mb-8">
-                         <li>• Engage Core constantly.</li>
-                         <li>• No twisting under load.</li>
-                         <li>• Stop immediately if sharp pain.</li>
-                     </ul>
-                     <button onClick={() => setShowSafety(false)} className="btn-danger">
-                         I Understand
-                     </button>
-                 </div>
-             )}
-          </div>
+        <ExerciseDisplay
+            exercise={exercise}
+            currentRound={currentRound}
+            totalRounds={dayData.rounds}
+            onComplete={() => handleExerciseComplete(exercises, handleCircuitComplete)}
+            onPrev={() => handlePrevExercise(exercises, handleCircuitPrev)}
+            showBack={true}
+            onCancel={onCancel}
+        />
       );
   }
 
   if (phase === 'finisher') {
       return (
           <div className="h-screen flex flex-col items-center p-4 text-center">
+               <div className="w-full flex justify-start mb-4">
+                  <button onClick={() => { setPhase('circuit'); setCurrentRound(dayData.rounds); setCurrentExerciseIdx(exercises.length - 1); }} className="text-slate-500"><ChevronLeft /></button>
+               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Cardio Finisher</h2>
               <p className="text-slate-400 mb-8">Tabata: 20s Work / 10s Rest x 8 Rounds</p>
-               <TabataPlayer onComplete={() => setPhase('cooldown')} />
+               <TabataPlayer onComplete={() => { setPhase('cooldown'); setCurrentExerciseIdx(0); }} />
           </div>
       );
   }
 
   if (phase === 'cooldown') {
-      return (
-          <div className="h-screen flex flex-col p-4">
-              <h2 className="text-xl font-bold text-white mb-4">Cooldown</h2>
-              <Checklist
-                items={COOLDOWN}
-                onComplete={onComplete}
-              />
-          </div>
-      );
+       // Convert Cooldown to linear flow too?
+       // "treat timebased warmup UI like it is the exercise" - user specifically mentioned Warmup.
+       // But consistency suggests Cooldown should also be consistent.
+       // However, Cooldown is usually a list you just check off.
+       // Let's check the COOLDOWN data structure update. I added `type: 'cooldown'` and `time`.
+       // So I should probably use the linear player for Cooldown too.
+
+       const exercise = COOLDOWN[currentExerciseIdx];
+       return (
+        <ExerciseDisplay
+            exercise={exercise}
+            onComplete={() => handleExerciseComplete(COOLDOWN, onComplete)}
+            onPrev={() => handlePrevExercise(COOLDOWN, () => {
+                if (isRecoveryDay) setPhase('recovery_main'); // or correct prev phase
+                else setPhase('finisher');
+            })}
+            showBack={true}
+            onCancel={onCancel}
+        />
+       );
   }
 
   return null;
@@ -336,28 +459,37 @@ const TabataPlayer = ({ onComplete }) => {
         if (isActive && timeLeft > 0) {
             interval = setInterval(() => {
                 setTimeLeft(t => {
-                   if (t <= 4 && t > 1) playCountdownBeep();
-                   return t - 1;
+                   const newVal = t - 1;
+                   if (newVal <= 3 && newVal > 0) playCountdownBeep();
+
+                   if (newVal <= 0) {
+                        // Timer finished
+                        clearInterval(interval);
+                        // Defer logic to avoid render cycle issues
+                        setTimeout(() => {
+                            playStopBeep();
+                            hapticStop();
+                            if (isWork) {
+                                setIsWork(false);
+                                setTimeLeft(10);
+                            } else {
+                                if (round < 8) {
+                                    setRound(r => r + 1);
+                                    setIsWork(true);
+                                    setTimeLeft(20);
+                                    playStartBeep();
+                                    hapticStart();
+                                } else {
+                                    setIsActive(false);
+                                    onComplete();
+                                }
+                            }
+                        }, 0);
+                        return 0;
+                   }
+                   return newVal;
                 });
             }, 1000);
-        } else if (timeLeft === 0) {
-            playStopBeep();
-            hapticStop();
-            if (isWork) {
-                setIsWork(false);
-                setTimeLeft(10);
-            } else {
-                if (round < 8) {
-                    setRound(r => r + 1);
-                    setIsWork(true);
-                    setTimeLeft(20);
-                    playStartBeep();
-                    hapticStart();
-                } else {
-                    setIsActive(false);
-                    onComplete();
-                }
-            }
         }
         return () => clearInterval(interval);
     }, [isActive, timeLeft, isWork, round, onComplete]);
