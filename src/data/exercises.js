@@ -3,6 +3,7 @@ export const EXERCISES = {
   legBlaster: {
     name: "Leg Blaster Complex",
     description: "20 Squats, 20 Lunges (10/leg), 10 Jump Squats, 10 Jump Lunges.",
+    reps: "1 Complex",
     image: "leg-blaster.gif",
     progression: {
       week1: {
@@ -25,7 +26,7 @@ export const EXERCISES = {
     goofyInstruction: "Do 2 extra lunges on LEFT leg."
   },
   rdl: {
-    name: "Single-Leg RDL",
+    name: "Single-Leg Romanian Deadlift",
     description: "Hinge at hips. Keep back flat like a table. No rounding.",
     reps: "12 per leg",
     image: "single-leg-rdl.gif",

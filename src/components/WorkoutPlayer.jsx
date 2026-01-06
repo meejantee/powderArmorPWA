@@ -176,7 +176,7 @@ const ExerciseDisplay = ({
                             src={`/images/${exercise.image}`}
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = "/images/PlaceHolder.gif";
+                                e.target.src = "/images/PlaceHolder.svg";
                             }}
                             alt={exercise.name}
                             className="w-full h-full object-cover"

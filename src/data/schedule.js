@@ -89,9 +89,10 @@ export const getDailyExercises = (dayNumber, stance) => {
       description: exerciseDef.description,
       weight: prog.weight,
       instruction: instruction,
-      reps: exerciseDef.reps,
-      time: exerciseDef.time,
-      variant: prog.variant
+      reps: prog.reps || exerciseDef.reps,
+      time: prog.time || exerciseDef.time,
+      variant: prog.variant,
+      image: exerciseDef.image
     };
   };
 
