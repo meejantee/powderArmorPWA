@@ -6,24 +6,61 @@ export const EXERCISES = {
     reps: "1 Complex",
     image: "leg-blaster.gif",
     progression: {
-      week1: {
-        weight: "Bodyweight",
-        instruction: "Hands on hips. Focus on perfect alignment."
-      },
-      week2: {
-        weight: "12kg Kettlebell",
-        instruction: "Goblet Hold. Keep chest up."
-      },
-      week3: {
-        weight: "12kg Kettlebell",
-        instruction: "Goblet Hold + 1 sec PAUSE at bottom of squats."
-      },
-      week4: {
-        weight: "Bodyweight",
-        instruction: "Hands on hips. Focus on speed and control."
-      }
+      week1: { weight: "Bodyweight", instruction: "Hands on hips. Focus on perfect alignment." },
+      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold. Keep chest up." },
+      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold + 1 sec PAUSE at bottom of squats." },
+      week4: { weight: "Bodyweight", instruction: "Hands on hips. Focus on speed and control." }
     },
     goofyInstruction: "Do 2 extra lunges on LEFT leg."
+  },
+  squats: {
+    name: "Squats",
+    description: "Keep weight in heels. Chest up. Break parallel.",
+    reps: "20 reps",
+    image: "squats.gif",
+    progression: {
+      week1: { weight: "Bodyweight", instruction: "Hands on hips. Focus on perfect alignment." },
+      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold. Keep chest up." },
+      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold + 1 sec PAUSE at bottom." },
+      week4: { weight: "Bodyweight", instruction: "Hands on hips. Focus on speed and control." }
+    }
+  },
+  lunges: {
+    name: "Lunges",
+    description: "Step forward. Back knee kisses the ground. Keep torso upright.",
+    reps: "20 reps (10/leg)",
+    image: "lunges.gif",
+    progression: {
+      week1: { weight: "Bodyweight", instruction: "Hands on hips." },
+      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
+      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
+      week4: { weight: "Bodyweight", instruction: "Hands on hips. Focus on speed." }
+    },
+    goofyInstruction: "Do 2 extra lunges on LEFT leg."
+  },
+  jumpSquats: {
+    name: "Jump Squats",
+    description: "Explode up. Land soft. Absorb impact.",
+    reps: "10 reps",
+    image: "jump-squats.gif",
+    progression: {
+      week1: { weight: "Bodyweight", instruction: "Hands on hips." },
+      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold (careful landing)." },
+      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
+      week4: { weight: "Bodyweight", instruction: "Max height." }
+    }
+  },
+  jumpLunges: {
+    name: "Jump Lunges",
+    description: "Explosive transition in air. Land soft.",
+    reps: "10 reps (5/leg)",
+    image: "jump-lunges.gif",
+    progression: {
+      week1: { weight: "Bodyweight", instruction: "Use arms for balance." },
+      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
+      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
+      week4: { weight: "Bodyweight", instruction: "Max speed." }
+    }
   },
   rdl: {
     name: "Single-Leg Romanian Deadlift",

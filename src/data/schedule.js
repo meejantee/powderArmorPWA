@@ -79,7 +79,7 @@ export const getDailyExercises = (dayNumber, stance) => {
     const prog = exerciseDef.progression[progressionKey] || exerciseDef.progression.all;
     let instruction = prog.instruction;
 
-    if (key === 'legBlaster' && stance === 'goofy') {
+    if (key === 'lunges' && stance === 'goofy') {
       instruction += ` ${exerciseDef.goofyInstruction}`;
     }
 
@@ -97,7 +97,10 @@ export const getDailyExercises = (dayNumber, stance) => {
   };
 
   return [
-    buildExercise('legBlaster', EXERCISES.legBlaster),
+    buildExercise('squats', EXERCISES.squats),
+    buildExercise('lunges', EXERCISES.lunges),
+    buildExercise('jumpSquats', EXERCISES.jumpSquats),
+    buildExercise('jumpLunges', EXERCISES.jumpLunges),
     buildExercise('rdl', EXERCISES.rdl),
     buildExercise('wallSit', EXERCISES.wallSit),
     buildExercise('core', EXERCISES.core),

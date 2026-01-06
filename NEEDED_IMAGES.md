@@ -9,7 +9,10 @@ Please place the following GIF or Image files in the `public/images/` directory 
 - `high-knees.gif`
 
 ## Main Exercises
-- `leg-blaster.gif`
+- `squats.gif`
+- `lunges.gif`
+- `jump-squats.gif`
+- `jump-lunges.gif`
 - `single-leg-rdl.gif`
 - `wall-sit.gif`
 - `core-plank.gif`
