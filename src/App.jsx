@@ -5,6 +5,7 @@ import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
 import WorkoutPlayer from './components/WorkoutPlayer';
 import TaperScreen from './components/TaperScreen';
+import WeeklyPreview from './components/WeeklyPreview';
 
 function App() {
   const { state, setStance, completeDay, daysUntilTrip } = useWorkoutState();
@@ -48,6 +49,10 @@ function App() {
     );
   }
 
+  if (view === 'weeklyPreview') {
+    return <WeeklyPreview onBack={() => setView('dashboard')} />;
+  }
+
   if (state.hasCompletedProgram && daysUntilTrip > 0) {
     return <TaperScreen daysUntilTrip={daysUntilTrip} />;
   }
@@ -57,6 +62,7 @@ function App() {
       state={state}
       daysUntilTrip={daysUntilTrip}
       onStartDay={startDay}
+      onViewWeekly={() => setView('weeklyPreview')}
     />
   );
 }

@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { generateSchedule, TOTAL_DAYS } from '../data/schedule';
-import { Calendar, Trophy, Zap, AlertTriangle, Mountain } from 'lucide-react';
+import { Calendar, Trophy, Zap, AlertTriangle, Mountain, BookOpen } from 'lucide-react';
 import clsx from 'clsx';
 
-const Dashboard = ({ state, daysUntilTrip, onStartDay }) => {
+const Dashboard = ({ state, daysUntilTrip, onStartDay, onViewWeekly }) => {
   const schedule = generateSchedule();
   const nextDay = state.currentDay;
 
@@ -92,10 +92,18 @@ const Dashboard = ({ state, daysUntilTrip, onStartDay }) => {
                 <button
                     onClick={() => onStartDay(todayConfig.day)}
                     className={clsx(
-                        todayConfig.type === 'rest' ? "btn-secondary" : "btn-primary"
+                        todayConfig.type === 'rest' ? "btn-secondary" : "btn-primary",
+                        "mb-3"
                     )}
                 >
                     {todayConfig.type === 'rest' ? 'Complete Rest Day' : 'Start Session'}
+                </button>
+
+                <button
+                    onClick={onViewWeekly}
+                    className="w-full py-3 bg-slate-900 border border-slate-700 rounded-lg font-bold text-slate-300 flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors"
+                >
+                    <BookOpen className="w-4 h-4" /> View Weekly Progression
                 </button>
             </div>
         )}
