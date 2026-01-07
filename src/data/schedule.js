@@ -37,6 +37,11 @@ export const generateSchedule = () => {
     const splitData = WEEKLY_SPLIT.find(s => s.dayOfWeek === dayOfWeek);
     dayConfig = { ...dayConfig, ...splitData };
 
+    // Immediate Schedule Fix: Hardcode Day 2 to 3 rounds due to user fatigue
+    if (day === 2) {
+      dayConfig.rounds = 3;
+    }
+
     if (day >= 22) {
       if (day === 27) {
         dayConfig.type = 'workout';

@@ -17,13 +17,10 @@ Please place the following GIF or Image files in the `public/images/` directory 
 - `dead-hang.gif`
 
 ### Dynamic Variations
-- `pulse-squats.gif` (Week 1 Squats)
-- `speed-squats.gif` (Week 2 & 4 Squats)
+- `pulse-squats.gif` (Week 1, 2, 4 Squats)
 - `jump-squats.gif` (Week 3 Squats)
-- `reverse-lunges.gif` (Week 1 Lunges)
-- `weighted-lunges.gif` (Week 2 & 4 Lunges)
-- `jump-lunges.gif` (Generic / Jump Lunge)
-- `split-jumps.gif` (Week 3 Lunges)
+- `split-pulses.gif` (Week 1, 2, 4 Lunges)
+- `jump-lunges.gif` (Week 3 Lunges)
 - `medicine-ball-drag.gif` (Week 3 Core)
 
 ## Cooldown

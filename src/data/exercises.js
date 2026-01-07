@@ -2,7 +2,7 @@
 export const EXERCISES = {
   legBlaster: {
     name: "Leg Blaster Complex",
-    description: "20 Squats, 20 Lunges (10/leg), 10 Jump Squats, 10 Jump Lunges.",
+    description: "Legacy Complex Definition (Unused)",
     reps: "1 Complex",
     image: "leg-blaster.gif",
     progression: {
@@ -19,10 +19,26 @@ export const EXERCISES = {
     reps: "20 reps",
     image: "squats.gif",
     progression: {
-      week1: { weight: "Bodyweight", instruction: "Hands on hips. Focus on perfect alignment." },
-      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold. Keep chest up." },
-      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold + 1 sec PAUSE at bottom." },
-      week4: { weight: "Bodyweight", instruction: "Hands on hips. Focus on speed and control." }
+      week1: {
+        reps: "10 reps",
+        weight: "Bodyweight",
+        instruction: "Hands on hips. Focus on perfect alignment."
+      },
+      week2: {
+        reps: "10 reps",
+        weight: "6kg Dumbbell",
+        instruction: "Goblet Hold. Keep chest up."
+      },
+      week3: {
+        reps: "20 reps",
+        weight: "12kg Kettlebell",
+        instruction: "Goblet Hold + 1 sec PAUSE at bottom."
+      },
+      week4: {
+        reps: "10 reps",
+        weight: "6kg Dumbbell",
+        instruction: "Goblet Hold. Focus on control."
+      }
     }
   },
   lunges: {
@@ -31,10 +47,26 @@ export const EXERCISES = {
     reps: "20 reps (10/leg)",
     image: "lunges.gif",
     progression: {
-      week1: { weight: "Bodyweight", instruction: "Hands on hips." },
-      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
-      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
-      week4: { weight: "Bodyweight", instruction: "Hands on hips. Focus on speed." }
+      week1: {
+        reps: "10 reps (5/leg)",
+        weight: "Bodyweight",
+        instruction: "Hands on hips."
+      },
+      week2: {
+        reps: "10 reps (5/leg)",
+        weight: "3kg Dumbbells",
+        instruction: "Hold in hands."
+      },
+      week3: {
+        reps: "20 reps (10/leg)",
+        weight: "5-6kg Dumbbells",
+        instruction: "Hold in hands."
+      },
+      week4: {
+        reps: "10 reps (5/leg)",
+        weight: "3kg Dumbbells",
+        instruction: "Hold in hands."
+      }
     },
     goofyInstruction: "Do 2 extra lunges on LEFT leg."
   },
@@ -46,27 +78,31 @@ export const EXERCISES = {
     progression: {
       week1: {
         name: "Pulse Squats",
+        reps: "5 reps",
         weight: "Bodyweight",
-        instruction: "Stay low, small bounce. NO jumping.",
+        instruction: "Stay low! Rise up halfway, drop back down. Constant tension.",
         image: "pulse-squats.gif"
       },
       week2: {
-        name: "Speed Squats",
-        weight: "12kg Kettlebell",
-        instruction: "Explode up fast, but keep feet on the floor.",
-        image: "speed-squats.gif"
+        name: "Pulse Squats",
+        reps: "5 reps",
+        weight: "6kg Dumbbell",
+        instruction: "Stay low! Rise up halfway, drop back down. Constant tension.",
+        image: "pulse-squats.gif"
       },
       week3: {
         name: "Jump Squats",
+        reps: "10 reps",
         weight: "Bodyweight",
         instruction: "Full jump. Land softly on toes.",
         image: "jump-squats.gif"
       },
       week4: {
-        name: "Speed Squats",
-        weight: "12kg Kettlebell",
-        instruction: "Explode up fast, but keep feet on the floor.",
-        image: "speed-squats.gif"
+        name: "Pulse Squats",
+        reps: "5 reps",
+        weight: "6kg Dumbbell",
+        instruction: "Stay low! Rise up halfway, drop back down. Constant tension.",
+        image: "pulse-squats.gif"
       }
     }
   },
@@ -77,28 +113,32 @@ export const EXERCISES = {
     image: "jump-lunges.gif",
     progression: {
       week1: {
-        name: "Reverse Lunges",
+        name: "Split Pulses",
+        reps: "5 reps",
         weight: "Bodyweight",
-        instruction: "Step backward. Bodyweight only.",
-        image: "reverse-lunges.gif"
+        instruction: "Hold lunge bottom. Pulse 3 inches. Do not straighten legs.",
+        image: "split-pulses.gif"
       },
       week2: {
-        name: "Weighted Reverse Lunges",
-        weight: "Dumbbells",
-        instruction: "Hold dumbbells. Step backward.",
-        image: "weighted-lunges.gif"
+        name: "Split Pulses",
+        reps: "5 reps",
+        weight: "3kg Dumbbells",
+        instruction: "Hold lunge bottom. Pulse 3 inches. Do not straighten legs.",
+        image: "split-pulses.gif"
       },
       week3: {
-        name: "Split Jumps",
+        name: "Jump Lunges",
+        reps: "10 reps (5/leg)",
         weight: "Bodyweight",
-        instruction: "Jump and switch legs in the air.",
-        image: "split-jumps.gif"
+        instruction: "Explosive transition in air. Land soft.",
+        image: "jump-lunges.gif"
       },
       week4: {
-        name: "Weighted Reverse Lunges",
-        weight: "Dumbbells",
-        instruction: "Hold dumbbells. Step backward.",
-        image: "weighted-lunges.gif"
+        name: "Split Pulses",
+        reps: "5 reps",
+        weight: "3kg Dumbbells",
+        instruction: "Hold lunge bottom. Pulse 3 inches. Do not straighten legs.",
+        image: "split-pulses.gif"
       }
     },
     goofyInstruction: "Do 2 extra reps on LEFT leg."
