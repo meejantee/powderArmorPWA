@@ -198,7 +198,12 @@ export const EXERCISES = {
 };
 
 export const WARMUP = [
-  { name: "Joint Rotations", instruction: "Wrists, Ankles, Neck", type: 'warmup', image: "joint-rotations.gif" },
+  {
+    name: "Joint Rotations",
+    instruction: "10 Wrist Rotations (each side)\n10 Knee Rotations (each side)\n10 Ankle Rotations (each side)\n10 Neck Rotations (each side)",
+    type: 'warmup',
+    image: "joint-rotations.gif"
+  },
   { name: "Cat-Cow", instruction: "Mobilize spine gently", reps: "10 reps", type: 'warmup', image: "cat-cow.gif" },
   { name: "Glute Bridges", instruction: "Squeeze at top", reps: "10 reps", type: 'warmup', image: "glute-bridges.gif" },
   { name: "High Knees", instruction: "Light impact", time: 20, type: 'warmup', image: "high-knees.gif" }

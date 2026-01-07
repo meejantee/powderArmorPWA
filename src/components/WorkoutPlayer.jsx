@@ -184,7 +184,7 @@ const ExerciseDisplay = ({
                     </div>
                 )}
 
-                 <p className="text-slate-300 text-lg mb-8 px-4">{exercise.instruction}</p>
+                 <p className="text-slate-300 text-lg mb-8 px-4 whitespace-pre-line leading-relaxed">{exercise.instruction}</p>
 
                  {exercise.time ? (
                      <div className="w-full flex flex-col items-center">
