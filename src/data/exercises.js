@@ -38,29 +38,70 @@ export const EXERCISES = {
     },
     goofyInstruction: "Do 2 extra lunges on LEFT leg."
   },
-  jumpSquats: {
-    name: "Jump Squats",
-    description: "Explode up. Land soft. Absorb impact.",
+  dynamicSquats: {
+    name: "Dynamic Squats",
+    description: "Explosive movement pattern.",
     reps: "10 reps",
     image: "jump-squats.gif",
     progression: {
-      week1: { weight: "Bodyweight", instruction: "Hands on hips." },
-      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold (careful landing)." },
-      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
-      week4: { weight: "Bodyweight", instruction: "Max height." }
+      week1: {
+        name: "Pulse Squats",
+        weight: "Bodyweight",
+        instruction: "Stay low, small bounce. NO jumping.",
+        image: "pulse-squats.gif"
+      },
+      week2: {
+        name: "Speed Squats",
+        weight: "12kg Kettlebell",
+        instruction: "Explode up fast, but keep feet on the floor.",
+        image: "speed-squats.gif"
+      },
+      week3: {
+        name: "Jump Squats",
+        weight: "Bodyweight",
+        instruction: "Full jump. Land softly on toes.",
+        image: "jump-squats.gif"
+      },
+      week4: {
+        name: "Speed Squats",
+        weight: "12kg Kettlebell",
+        instruction: "Explode up fast, but keep feet on the floor.",
+        image: "speed-squats.gif"
+      }
     }
   },
-  jumpLunges: {
-    name: "Jump Lunges",
-    description: "Explosive transition in air. Land soft.",
+  dynamicLunges: {
+    name: "Dynamic Lunges",
+    description: "Unilateral leg power.",
     reps: "10 reps (5/leg)",
     image: "jump-lunges.gif",
     progression: {
-      week1: { weight: "Bodyweight", instruction: "Use arms for balance." },
-      week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
-      week3: { weight: "12kg Kettlebell", instruction: "Goblet Hold." },
-      week4: { weight: "Bodyweight", instruction: "Max speed." }
-    }
+      week1: {
+        name: "Reverse Lunges",
+        weight: "Bodyweight",
+        instruction: "Step backward. Bodyweight only.",
+        image: "reverse-lunges.gif"
+      },
+      week2: {
+        name: "Weighted Reverse Lunges",
+        weight: "Dumbbells",
+        instruction: "Hold dumbbells. Step backward.",
+        image: "weighted-lunges.gif"
+      },
+      week3: {
+        name: "Split Jumps",
+        weight: "Bodyweight",
+        instruction: "Jump and switch legs in the air.",
+        image: "split-jumps.gif"
+      },
+      week4: {
+        name: "Weighted Reverse Lunges",
+        weight: "Dumbbells",
+        instruction: "Hold dumbbells. Step backward.",
+        image: "weighted-lunges.gif"
+      }
+    },
+    goofyInstruction: "Do 2 extra reps on LEFT leg."
   },
   rdl: {
     name: "Single-Leg Romanian Deadlift",
@@ -128,10 +169,11 @@ export const EXERCISES = {
         instruction: "Roll ball from left to right hand under chest."
       },
       week3: {
-        variant: "Plank KB Drag",
-        weight: "12kg Kettlebell",
+        variant: "Plank Medicine Ball Drag",
+        weight: "12kg Medicine Ball",
         reps: "12 reps",
-        instruction: "Drag bell across body (High friction)."
+        instruction: "Drag ball across body (High friction).",
+        image: "medicine-ball-drag.gif"
       },
       week4: {
         variant: "Shoulder Taps",

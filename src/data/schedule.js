@@ -79,28 +79,29 @@ export const getDailyExercises = (dayNumber, stance) => {
     const prog = exerciseDef.progression[progressionKey] || exerciseDef.progression.all;
     let instruction = prog.instruction;
 
-    if (key === 'lunges' && stance === 'goofy') {
+    // Also apply goofy instruction to dynamicLunges if present
+    if ((key === 'lunges' || key === 'dynamicLunges') && stance === 'goofy' && exerciseDef.goofyInstruction) {
       instruction += ` ${exerciseDef.goofyInstruction}`;
     }
 
     return {
       id: key,
-      name: exerciseDef.name,
+      name: prog.name || exerciseDef.name, // Use progression name if available (for Pulse/Speed/Jump Squats)
       description: exerciseDef.description,
       weight: prog.weight,
       instruction: instruction,
       reps: prog.reps || exerciseDef.reps,
       time: prog.time || exerciseDef.time,
       variant: prog.variant,
-      image: exerciseDef.image
+      image: prog.image || exerciseDef.image // Use progression image if available
     };
   };
 
   return [
     buildExercise('squats', EXERCISES.squats),
     buildExercise('lunges', EXERCISES.lunges),
-    buildExercise('jumpSquats', EXERCISES.jumpSquats),
-    buildExercise('jumpLunges', EXERCISES.jumpLunges),
+    buildExercise('dynamicSquats', EXERCISES.dynamicSquats),
+    buildExercise('dynamicLunges', EXERCISES.dynamicLunges),
     buildExercise('rdl', EXERCISES.rdl),
     buildExercise('wallSit', EXERCISES.wallSit),
     buildExercise('core', EXERCISES.core),

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import {
   Play, Pause, SkipForward, CheckCircle, AlertTriangle,
-  RotateCcw, Volume2, ShieldAlert, ChevronLeft
+  RotateCcw, Volume2, ShieldAlert, ChevronLeft, FastForward
 } from 'lucide-react';
 import { getDailyExercises, generateSchedule } from '../data/schedule';
 import { WARMUP, COOLDOWN } from '../data/exercises';
@@ -187,13 +187,21 @@ const ExerciseDisplay = ({
                  <p className="text-slate-300 text-lg mb-8 px-4">{exercise.instruction}</p>
 
                  {exercise.time ? (
-                     <Timer
-                        key={exercise.name} // Force remount on exercise change to reset timer state
-                        duration={exercise.time}
-                        label={exercise.type === 'warmup' ? "Warmup" : "Work"}
-                        onComplete={onComplete}
-                        autoStart={false} // Or true if desired, but default to false to let user start
-                     />
+                     <div className="w-full flex flex-col items-center">
+                         <Timer
+                            key={exercise.name} // Force remount on exercise change to reset timer state
+                            duration={exercise.time}
+                            label={exercise.type === 'warmup' ? "Warmup" : "Work"}
+                            onComplete={onComplete}
+                            autoStart={false} // Or true if desired, but default to false to let user start
+                         />
+                         <button
+                            onClick={onComplete}
+                            className="text-slate-500 flex items-center gap-2 text-sm hover:text-white transition-colors"
+                         >
+                            <FastForward className="w-4 h-4" /> Skip Timer
+                         </button>
+                     </div>
                  ) : (
                      <button
                         onClick={onComplete}
