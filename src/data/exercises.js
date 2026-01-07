@@ -31,8 +31,8 @@ export const EXERCISES = {
       },
       week3: {
         reps: "20 reps",
-        weight: "12kg Kettlebell",
-        instruction: "Goblet Hold + 1 sec PAUSE at bottom."
+        weight: "6kg Dumbbell",
+        instruction: "Goblet Hold. Grind it out."
       },
       week4: {
         reps: "10 reps",
@@ -59,8 +59,8 @@ export const EXERCISES = {
       },
       week3: {
         reps: "20 reps (10/leg)",
-        weight: "5-6kg Dumbbells",
-        instruction: "Hold in hands."
+        weight: "3kg Dumbbells",
+        instruction: "Hold in hands. Stay stable."
       },
       week4: {
         reps: "10 reps (5/leg)",
@@ -74,7 +74,7 @@ export const EXERCISES = {
     name: "Dynamic Squats",
     description: "Explosive movement pattern.",
     reps: "10 reps",
-    image: "jump-squats.gif",
+    image: "speed-squats.gif",
     progression: {
       week1: {
         name: "Pulse Squats",
@@ -91,11 +91,11 @@ export const EXERCISES = {
         image: "pulse-squats.gif"
       },
       week3: {
-        name: "Jump Squats",
+        name: "Speed Squats",
         reps: "10 reps",
-        weight: "Bodyweight",
-        instruction: "Full jump. Land softly on toes.",
-        image: "jump-squats.gif"
+        weight: "6kg Dumbbell",
+        instruction: "Fast tempo, NO Jump. Explode up but feet stay flat.",
+        image: "speed-squats.gif"
       },
       week4: {
         name: "Pulse Squats",
@@ -110,7 +110,7 @@ export const EXERCISES = {
     name: "Dynamic Lunges",
     description: "Unilateral leg power.",
     reps: "10 reps (5/leg)",
-    image: "jump-lunges.gif",
+    image: "split-pulses.gif",
     progression: {
       week1: {
         name: "Split Pulses",
@@ -127,11 +127,11 @@ export const EXERCISES = {
         image: "split-pulses.gif"
       },
       week3: {
-        name: "Jump Lunges",
+        name: "Pulse Lunges",
         reps: "10 reps (5/leg)",
-        weight: "Bodyweight",
-        instruction: "Explosive transition in air. Land soft.",
-        image: "jump-lunges.gif"
+        weight: "3kg Dumbbells",
+        instruction: "Bottom pulses, NO Jump. Stay low.",
+        image: "split-pulses.gif"
       },
       week4: {
         name: "Split Pulses",

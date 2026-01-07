@@ -6,7 +6,7 @@ export const TOTAL_DAYS = 30;
 const PHASES = {
   1: { name: "BASE PHASE", intensity: "Low", rest: 120 },
   2: { name: "LOAD PHASE", intensity: "Medium", rest: 120 },
-  3: { name: "ENDURANCE PHASE", intensity: "High", rest: 90 },
+  3: { name: "ENDURANCE PHASE", intensity: "High", rest: 90, note: "Peak Endurance. High Reps + Weight. No Jumping. Grind it out." },
   4: { name: "TAPER PHASE", intensity: "Low", rest: 120 }
 };
 
@@ -36,6 +36,11 @@ export const generateSchedule = () => {
 
     const splitData = WEEKLY_SPLIT.find(s => s.dayOfWeek === dayOfWeek);
     dayConfig = { ...dayConfig, ...splitData };
+
+    // Pass phase note to day config if present (overriding split note if needed, or appending)
+    if (dayConfig.phase && dayConfig.phase.note && !dayConfig.note) {
+         dayConfig.note = dayConfig.phase.note;
+    }
 
     // Immediate Schedule Fix: Hardcode Day 2 to 3 rounds due to user fatigue
     if (day === 2) {
