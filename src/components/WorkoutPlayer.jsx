@@ -178,6 +178,7 @@ const ExerciseDisplay = ({
                 {isVideoMode && exercise.video && (
                     <div className="w-full max-w-xs aspect-video bg-slate-800 rounded-lg mb-6 overflow-hidden border border-slate-700 flex items-center justify-center">
                         <video
+                            key={exercise.video}
                             src={`/images/${exercise.video}`}
                             autoPlay
                             loop
