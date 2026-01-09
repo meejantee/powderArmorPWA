@@ -20,7 +20,7 @@ function App() {
   const { state, setStance, completeDay, daysUntilTrip } = useWorkoutState();
   const [view, setView] = useState('dashboard');
   const [activeDay, setActiveDay] = useState(null);
-  const [isVideoMode, setIsVideoMode] = useState(false);
+  const [isSessionUnlocked, setIsSessionUnlocked] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
   const showToast = (msg) => {
@@ -28,9 +28,9 @@ function App() {
       setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const handleSetVideoMode = (mode) => {
-      setIsVideoMode(mode);
-      showToast(mode ? "Video Mode Activated" : "Video Mode Disabled");
+  const handleUnlockSession = (unlocked) => {
+      setIsSessionUnlocked(unlocked);
+      showToast(unlocked ? "Session Unlocked" : "Session Locked");
   };
 
   if (!state.stance) {
@@ -66,7 +66,6 @@ function App() {
         stance={state.stance}
         onComplete={finishWorkout}
         onCancel={cancelWorkout}
-        isVideoMode={isVideoMode}
       />
     );
   }
@@ -86,8 +85,8 @@ function App() {
         daysUntilTrip={daysUntilTrip}
         onStartDay={startDay}
         onViewWeekly={() => setView('weeklyPreview')}
-        onSetVideoMode={handleSetVideoMode}
-        isVideoMode={isVideoMode}
+        onUnlockSession={handleUnlockSession}
+        isSessionUnlocked={isSessionUnlocked}
         />
         <Toast message={toastMessage} />
     </>

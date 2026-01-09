@@ -4,7 +4,7 @@ import { generateSchedule, TOTAL_DAYS } from '../data/schedule';
 import { Calendar, Trophy, Zap, AlertTriangle, Mountain, BookOpen } from 'lucide-react';
 import clsx from 'clsx';
 
-const Dashboard = ({ state, daysUntilTrip, onStartDay, onViewWeekly, onSetVideoMode, isVideoMode }) => {
+const Dashboard = ({ state, daysUntilTrip, onStartDay, onViewWeekly, onUnlockSession, isSessionUnlocked }) => {
   const schedule = generateSchedule();
   const nextDay = state.currentDay;
   const [titleTapCount, setTitleTapCount] = useState(0);
@@ -12,18 +12,11 @@ const Dashboard = ({ state, daysUntilTrip, onStartDay, onViewWeekly, onSetVideoM
   const todayConfig = schedule.find(d => d.day === nextDay);
 
   const handleTitleTap = () => {
-    if (isVideoMode) return; // Already enabled
+    if (isSessionUnlocked) return; // Already unlocked
     const newCount = titleTapCount + 1;
     setTitleTapCount(newCount);
     if (newCount >= 7) {
-        onSetVideoMode(true);
-        setTitleTapCount(0);
-    }
-  };
-
-  const handleDaysTap = () => {
-    if (isVideoMode) {
-        onSetVideoMode(false);
+        onUnlockSession(true);
         setTitleTapCount(0);
     }
   };
@@ -78,7 +71,7 @@ const Dashboard = ({ state, daysUntilTrip, onStartDay, onViewWeekly, onSetVideoM
                 </h1>
                 <p className="text-sm text-slate-400">Preparation Protocol</p>
             </div>
-            <div className="text-right cursor-pointer select-none" onClick={handleDaysTap}>
+            <div className="text-right">
                  <div className="text-2xl font-mono font-bold text-powder-400">{daysUntilTrip}</div>
                  <div className="text-xs text-slate-500 uppercase tracking-wider">Days to Trip</div>
             </div>
@@ -109,9 +102,11 @@ const Dashboard = ({ state, daysUntilTrip, onStartDay, onViewWeekly, onSetVideoM
 
                 <button
                     onClick={() => onStartDay(todayConfig.day)}
+                    disabled={!isSessionUnlocked && todayConfig.type !== 'rest'} // Rest days maybe always unlockable? Prompt implies "start session button" which is for workouts. But to be safe, disable all. Prompt says "disable start session button".
                     className={clsx(
                         todayConfig.type === 'rest' ? "btn-secondary" : "btn-primary",
-                        "mb-3"
+                        "mb-3",
+                        (!isSessionUnlocked && todayConfig.type !== 'rest') && "opacity-50 cursor-not-allowed"
                     )}
                 >
                     {todayConfig.type === 'rest' ? 'Complete Rest Day' : 'Start Session'}

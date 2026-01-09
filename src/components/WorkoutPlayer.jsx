@@ -141,8 +141,7 @@ const ExerciseDisplay = ({
   totalRounds,
   showBack,
   onCancel,
-  side, // 'Left' or 'Right' or null
-  isVideoMode
+  side // 'Left' or 'Right' or null
 }) => {
     const [showSafety, setShowSafety] = useState(false);
 
@@ -176,10 +175,7 @@ const ExerciseDisplay = ({
 
                 {/* Video/Image Display */}
                 {exercise.video && (
-                    <div className={clsx(
-                        "w-full max-w-xs aspect-video bg-slate-800 rounded-lg mb-6 overflow-hidden border border-slate-700 flex items-center justify-center",
-                        !isVideoMode && "hidden"
-                    )}>
+                    <div className="w-full max-w-xs aspect-video bg-slate-800 rounded-lg mb-6 overflow-hidden border border-slate-700 flex items-center justify-center">
                         <video
                             key={exercise.video}
                             src={`/images/${exercise.video}`}
@@ -256,7 +252,7 @@ const ExerciseDisplay = ({
     );
 }
 
-const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel, isVideoMode }) => {
+const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   const [phase, setPhase] = useState('warmup');
   const [currentRound, setCurrentRound] = useState(1);
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
@@ -395,7 +391,6 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel, isVideoMode })
       return (
         <ExerciseDisplay
             exercise={exercise}
-            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(WARMUP, () => {
                  if (isRecoveryDay) {
                      setPhase('recovery_main');
@@ -434,7 +429,6 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel, isVideoMode })
             currentRound={currentRound}
             totalRounds={3} // Hardcoded 3 rounds for recovery
             side={currentSide}
-            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(COOLDOWN, () => {
                  // End of Round
                  if (currentRound < 3) {
@@ -500,7 +494,6 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel, isVideoMode })
             currentRound={currentRound}
             totalRounds={dayData.rounds}
             side={currentSide}
-            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(exercises, handleCircuitComplete)}
             onPrev={() => handlePrevExercise(exercises, handleCircuitPrev)}
             showBack={true}
@@ -535,7 +528,6 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel, isVideoMode })
         <ExerciseDisplay
             exercise={exercise}
             side={currentSide}
-            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(COOLDOWN, onComplete)}
             onPrev={() => handlePrevExercise(COOLDOWN, () => {
                 if (isRecoveryDay) {
