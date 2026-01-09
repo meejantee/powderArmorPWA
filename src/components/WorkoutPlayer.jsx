@@ -141,7 +141,8 @@ const ExerciseDisplay = ({
   totalRounds,
   showBack,
   onCancel,
-  side // 'Left' or 'Right' or null
+  side, // 'Left' or 'Right' or null
+  isVideoMode
 }) => {
     const [showSafety, setShowSafety] = useState(false);
 
@@ -173,16 +174,15 @@ const ExerciseDisplay = ({
                      </span>
                  </div>
 
-                {/* Image Placeholder */}
-                {exercise.image && (
+                {/* Video/Image Display */}
+                {isVideoMode && exercise.video && (
                     <div className="w-full max-w-xs aspect-video bg-slate-800 rounded-lg mb-6 overflow-hidden border border-slate-700 flex items-center justify-center">
-                        <img
-                            src={`/images/${exercise.image}`}
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = "/images/PlaceHolder.svg";
-                            }}
-                            alt={exercise.name}
+                        <video
+                            src={`/images/${exercise.video}`}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
                             className="w-full h-full object-cover"
                         />
                     </div>
@@ -193,7 +193,7 @@ const ExerciseDisplay = ({
                  {exercise.time ? (
                      <div className="w-full flex flex-col items-center">
                          <Timer
-                            key={exercise.name} // Force remount on exercise change to reset timer state
+                            key={`${exercise.name}-${side || 'main'}`} // Force remount on exercise/side change
                             duration={exercise.time}
                             label={exercise.type === 'warmup' ? "Warmup" : "Work"}
                             onComplete={onComplete}
@@ -252,7 +252,7 @@ const ExerciseDisplay = ({
     );
 }
 
-const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
+const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel, isVideoMode }) => {
   const [phase, setPhase] = useState('warmup');
   const [currentRound, setCurrentRound] = useState(1);
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
@@ -391,6 +391,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
       return (
         <ExerciseDisplay
             exercise={exercise}
+            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(WARMUP, () => {
                  if (isRecoveryDay) {
                      setPhase('recovery_main');
@@ -429,6 +430,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
             currentRound={currentRound}
             totalRounds={3} // Hardcoded 3 rounds for recovery
             side={currentSide}
+            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(COOLDOWN, () => {
                  // End of Round
                  if (currentRound < 3) {
@@ -494,6 +496,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
             currentRound={currentRound}
             totalRounds={dayData.rounds}
             side={currentSide}
+            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(exercises, handleCircuitComplete)}
             onPrev={() => handlePrevExercise(exercises, handleCircuitPrev)}
             showBack={true}
@@ -528,6 +531,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
         <ExerciseDisplay
             exercise={exercise}
             side={currentSide}
+            isVideoMode={isVideoMode}
             onComplete={() => handleExerciseComplete(COOLDOWN, onComplete)}
             onPrev={() => handlePrevExercise(COOLDOWN, () => {
                 if (isRecoveryDay) {

@@ -4,7 +4,7 @@ export const EXERCISES = {
     name: "Leg Blaster Complex",
     description: "Legacy Complex Definition (Unused)",
     reps: "1 Complex",
-    image: "leg-blaster.gif",
+    video: "leg-blaster.mp4",
     progression: {
       week1: { weight: "Bodyweight", instruction: "Hands on hips. Focus on perfect alignment." },
       week2: { weight: "12kg Kettlebell", instruction: "Goblet Hold. Keep chest up." },
@@ -17,7 +17,7 @@ export const EXERCISES = {
     name: "Squats",
     description: "Keep weight in heels. Chest up. Break parallel.",
     reps: "20 reps",
-    image: "squats.gif",
+    video: "squats.mp4",
     progression: {
       week1: {
         reps: "10 reps",
@@ -46,7 +46,7 @@ export const EXERCISES = {
     description: "Step forward. Back knee kisses the ground. Keep torso upright.",
     reps: "20 reps (10/leg)",
     isUnilateral: true,
-    image: "lunges.gif",
+    video: "lunges.mp4",
     progression: {
       week1: {
         reps: "10 reps (5/leg)",
@@ -75,35 +75,35 @@ export const EXERCISES = {
     name: "Dynamic Squats",
     description: "Explosive movement pattern.",
     reps: "10 reps",
-    image: "speed-squats.gif",
+    video: "speed-squats.mp4",
     progression: {
       week1: {
         name: "Pulse Squats",
         reps: "5 reps",
         weight: "Bodyweight",
         instruction: "Stay low! Rise up halfway, drop back down. Constant tension.",
-        image: "pulse-squats.gif"
+        video: "pulse-squats.mp4"
       },
       week2: {
         name: "Pulse Squats",
         reps: "5 reps",
         weight: "6kg Dumbbell",
         instruction: "Stay low! Rise up halfway, drop back down. Constant tension.",
-        image: "pulse-squats.gif"
+        video: "pulse-squats.mp4"
       },
       week3: {
         name: "Speed Squats",
         reps: "10 reps",
         weight: "6kg Dumbbell",
         instruction: "Fast tempo, NO Jump. Explode up but feet stay flat.",
-        image: "speed-squats.gif"
+        video: "speed-squats.mp4"
       },
       week4: {
         name: "Pulse Squats",
         reps: "5 reps",
         weight: "6kg Dumbbell",
         instruction: "Stay low! Rise up halfway, drop back down. Constant tension.",
-        image: "pulse-squats.gif"
+        video: "pulse-squats.mp4"
       }
     }
   },
@@ -112,35 +112,35 @@ export const EXERCISES = {
     description: "Unilateral leg power.",
     reps: "10 reps (5/leg)",
     isUnilateral: true,
-    image: "split-pulses.gif",
+    video: "split-pulses.mp4",
     progression: {
       week1: {
         name: "Split Pulses",
         reps: "5 reps",
         weight: "Bodyweight",
         instruction: "Hold lunge bottom. Pulse 3 inches. Do not straighten legs.",
-        image: "split-pulses.gif"
+        video: "split-pulses.mp4"
       },
       week2: {
         name: "Split Pulses",
         reps: "5 reps",
         weight: "3kg Dumbbells",
         instruction: "Hold lunge bottom. Pulse 3 inches. Do not straighten legs.",
-        image: "split-pulses.gif"
+        video: "split-pulses.mp4"
       },
       week3: {
         name: "Pulse Lunges",
         reps: "10 reps (5/leg)",
         weight: "3kg Dumbbells",
         instruction: "Bottom pulses, NO Jump. Stay low.",
-        image: "split-pulses.gif"
+        video: "split-pulses.mp4"
       },
       week4: {
         name: "Split Pulses",
         reps: "5 reps",
         weight: "3kg Dumbbells",
         instruction: "Hold lunge bottom. Pulse 3 inches. Do not straighten legs.",
-        image: "split-pulses.gif"
+        video: "split-pulses.mp4"
       }
     },
     goofyInstruction: "Do 2 extra reps on LEFT leg."
@@ -150,7 +150,7 @@ export const EXERCISES = {
     description: "Hinge at hips. Keep back flat like a table. No rounding.",
     reps: "12 per leg",
     isUnilateral: true,
-    image: "single-leg-rdl.gif",
+    video: "single-leg-rdl.mp4",
     progression: {
       week1: {
         weight: "Bodyweight",
@@ -174,7 +174,7 @@ export const EXERCISES = {
     name: "Wall Sit",
     description: "Knees at 90 degrees. Press lower back into the wall.",
     time: 60,
-    image: "wall-sit.gif",
+    video: "wall-sit.mp4",
     progression: {
       week1: {
         weight: "Bodyweight",
@@ -197,7 +197,7 @@ export const EXERCISES = {
   core: {
     name: "Core Anti-Rotation",
     description: "Imagine a glass of water on your lower back. Don't spill it.",
-    image: "core-plank.gif",
+    video: "core-plank.mp4",
     progression: {
       week1: {
         variant: "Shoulder Taps",
@@ -216,7 +216,7 @@ export const EXERCISES = {
         weight: "12kg Medicine Ball",
         reps: "12 reps",
         instruction: "Drag ball across body (High friction).",
-        image: "medicine-ball-drag.gif"
+        video: "medicine-ball-drag.mp4"
       },
       week4: {
         variant: "Shoulder Taps",
@@ -230,7 +230,7 @@ export const EXERCISES = {
     name: "Dead Hang",
     description: "Decompress Spine. Relax shoulders.",
     time: 60,
-    image: "dead-hang.gif",
+    video: "dead-hang.mp4",
     progression: {
       all: {
         weight: "Bodyweight",
@@ -245,16 +245,16 @@ export const WARMUP = [
     name: "Joint Rotations",
     instruction: "10 Wrist Rotations (each side)\n10 Knee Rotations (each side)\n10 Ankle Rotations (each side)\n10 Neck Rotations (each side)",
     type: 'warmup',
-    image: "joint-rotations.gif"
+    video: "joint-rotations.mp4"
   },
-  { name: "Cat-Cow", instruction: "Mobilize spine gently", reps: "10 reps", type: 'warmup', image: "cat-cow.gif" },
-  { name: "Glute Bridges", instruction: "Squeeze at top", reps: "10 reps", type: 'warmup', image: "glute-bridges.gif" },
-  { name: "High Knees", instruction: "Light impact", time: 20, type: 'warmup', image: "high-knees.gif" }
+  { name: "Cat-Cow", instruction: "Mobilize spine gently", reps: "10 reps", type: 'warmup', video: "cat-cow.mp4" },
+  { name: "Glute Bridges", instruction: "Squeeze at top", reps: "10 reps", type: 'warmup', video: "glute-bridges.mp4" },
+  { name: "High Knees", instruction: "Light impact", time: 20, type: 'warmup', video: "high-knees.mp4" }
 ];
 
 export const COOLDOWN = [
-  { name: "Figure-4 Stretch", instruction: "Glutes", time: 30, type: 'cooldown', image: "figure-4.gif", isUnilateral: true },
-  { name: "Lunge Stretch", instruction: "Hip Flexors", time: 30, type: 'cooldown', image: "lunge-stretch.gif", isUnilateral: true },
-  { name: "Child's Pose", instruction: "Lower Back", time: 45, type: 'cooldown', image: "childs-pose.gif" },
-  { name: "Doorway Stretch", instruction: "Chest/Pec", time: 30, type: 'cooldown', image: "doorway-stretch.gif", isUnilateral: true }
+  { name: "Figure-4 Stretch", instruction: "Glutes", time: 30, type: 'cooldown', video: "figure-4.mp4", isUnilateral: true },
+  { name: "Lunge Stretch", instruction: "Hip Flexors", time: 30, type: 'cooldown', video: "lunge-stretch.mp4", isUnilateral: true },
+  { name: "Child's Pose", instruction: "Lower Back", time: 45, type: 'cooldown', video: "childs-pose.mp4" },
+  { name: "Doorway Stretch", instruction: "Chest/Pec", time: 30, type: 'cooldown', video: "doorway-stretch.mp4", isUnilateral: true }
 ];

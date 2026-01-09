@@ -103,7 +103,7 @@ export const getDailyExercises = (dayNumber, stance) => {
       reps: prog.reps || exerciseDef.reps,
       time: prog.time || exerciseDef.time,
       variant: prog.variant,
-      image: prog.image || exerciseDef.image // Use progression image if available
+      video: prog.video || exerciseDef.video // Use progression video if available
     };
   };
 
