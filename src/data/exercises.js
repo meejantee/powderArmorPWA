@@ -45,6 +45,7 @@ export const EXERCISES = {
     name: "Lunges",
     description: "Step forward. Back knee kisses the ground. Keep torso upright.",
     reps: "20 reps (10/leg)",
+    isUnilateral: true,
     image: "lunges.gif",
     progression: {
       week1: {
@@ -110,6 +111,7 @@ export const EXERCISES = {
     name: "Dynamic Lunges",
     description: "Unilateral leg power.",
     reps: "10 reps (5/leg)",
+    isUnilateral: true,
     image: "split-pulses.gif",
     progression: {
       week1: {
@@ -147,6 +149,7 @@ export const EXERCISES = {
     name: "Single-Leg Romanian Deadlift",
     description: "Hinge at hips. Keep back flat like a table. No rounding.",
     reps: "12 per leg",
+    isUnilateral: true,
     image: "single-leg-rdl.gif",
     progression: {
       week1: {
@@ -250,8 +253,8 @@ export const WARMUP = [
 ];
 
 export const COOLDOWN = [
-  { name: "Figure-4 Stretch", instruction: "Glutes", time: 30, type: 'cooldown', image: "figure-4.gif" },
-  { name: "Lunge Stretch", instruction: "Hip Flexors", time: 30, type: 'cooldown', image: "lunge-stretch.gif" },
+  { name: "Figure-4 Stretch", instruction: "Glutes", time: 30, type: 'cooldown', image: "figure-4.gif", isUnilateral: true },
+  { name: "Lunge Stretch", instruction: "Hip Flexors", time: 30, type: 'cooldown', image: "lunge-stretch.gif", isUnilateral: true },
   { name: "Child's Pose", instruction: "Lower Back", time: 45, type: 'cooldown', image: "childs-pose.gif" },
-  { name: "Doorway Stretch", instruction: "Chest/Pec", time: 30, type: 'cooldown', image: "doorway-stretch.gif" }
+  { name: "Doorway Stretch", instruction: "Chest/Pec", time: 30, type: 'cooldown', image: "doorway-stretch.gif", isUnilateral: true }
 ];

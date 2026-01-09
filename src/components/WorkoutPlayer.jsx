@@ -140,7 +140,8 @@ const ExerciseDisplay = ({
   currentRound,
   totalRounds,
   showBack,
-  onCancel
+  onCancel,
+  side // 'Left' or 'Right' or null
 }) => {
     const [showSafety, setShowSafety] = useState(false);
 
@@ -157,7 +158,10 @@ const ExerciseDisplay = ({
              </div>
 
              <div className="flex-1 flex flex-col items-center text-center overflow-y-auto">
-                 <h2 className="text-3xl font-bold text-white mb-2">{exercise.name}</h2>
+                 <h2 className="text-3xl font-bold text-white mb-2">
+                    {exercise.name}
+                    {side && <span className="block text-2xl text-powder-400 mt-1">- {side} Side -</span>}
+                 </h2>
 
                  <div className="bg-slate-900 rounded-lg px-4 py-2 mb-4 border border-slate-800">
                      <span className="text-powder-400 font-bold text-lg">
@@ -253,6 +257,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   const [currentRound, setCurrentRound] = useState(1);
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
   const [isResting, setIsResting] = useState(false);
+  const [currentSide, setCurrentSide] = useState(null); // 'Left' or 'Right' for unilateral exercises
   const { requestWakeLock } = useWakeLock();
 
   const schedule = generateSchedule();
@@ -271,6 +276,26 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   const handleExerciseComplete = (exerciseList, nextPhaseCallback) => {
       playStopBeep();
 
+      const currentExercise = exerciseList[currentExerciseIdx];
+
+      // Handle Unilateral Logic (Split Sides)
+      if (currentExercise.isUnilateral) {
+          if (!currentSide) {
+              // Start Left Side (First Side)
+              setCurrentSide('Left');
+              playStartBeep();
+              return;
+          } else if (currentSide === 'Left') {
+              // Switch to Right Side
+              setCurrentSide('Right');
+              playStartBeep();
+              return;
+          } else {
+              // Finished both sides
+              setCurrentSide(null);
+          }
+      }
+
       const isLastExercise = currentExerciseIdx >= exerciseList.length - 1;
 
       if (isLastExercise) {
@@ -283,8 +308,31 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   };
 
   const handlePrevExercise = (exerciseList, prevPhaseCallback) => {
+      const currentExercise = exerciseList[currentExerciseIdx];
+
+      if (currentExercise.isUnilateral) {
+           if (currentSide === 'Right') {
+               setCurrentSide('Left');
+               return;
+           } else if (currentSide === 'Left') {
+               setCurrentSide(null);
+               // Then fall through to go to previous exercise index
+           }
+      }
+
       if (currentExerciseIdx > 0) {
           setCurrentExerciseIdx(prev => prev - 1);
+
+          // If previous exercise was unilateral, we should technically go to its Right side?
+          // For simplicity, let's just go to the start of the previous exercise (null side or 'Left' if we force logic).
+          // Ideally: Check if prev exercise is unilateral, if so set side to 'Right'.
+          const prevExercise = exerciseList[currentExerciseIdx - 1];
+          if (prevExercise && prevExercise.isUnilateral) {
+             setCurrentSide('Right');
+          } else {
+             setCurrentSide(null);
+          }
+
       } else {
           // If first exercise of list, delegate to callback (e.g. go to previous round or phase)
           prevPhaseCallback && prevPhaseCallback();
@@ -360,19 +408,55 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   }
 
   if (phase === 'recovery_main') {
+       // Active Recovery now uses the standard player flow (3 Rounds of Cooldown items)
+       // We'll reuse the COOLDOWN list but treat them as the "circuit".
+       // Note: The original logic had "3 Rounds". We need to handle rounds here too.
+
+       const exercise = COOLDOWN[currentExerciseIdx];
+       // Override note/time for recovery context if needed, though they are set in data/exercises.js or COOLDOWN.
+       // The original text said "Hold 90s". The current COOLDOWN items have 30s/45s.
+       // We should ideally override them here or create a separate RECOVERY list.
+       // Let's override on the fly for simplicity to match the "Hold 90s" instruction.
+       const recoveryExercise = {
+           ...exercise,
+           time: 90,
+           instruction: exercise.instruction + " (Hold 90s)"
+       };
+
        return (
-           <div className="h-screen flex flex-col p-4">
-               <div className="flex justify-between items-center mb-4">
-                   <button onClick={() => { setPhase('warmup'); setCurrentExerciseIdx(WARMUP.length - 1); }}><ChevronLeft /></button>
-                    <h2 className="text-xl font-bold text-blue-400">Active Recovery</h2>
-                   <div className="w-6"></div>
-               </div>
-               <p className="text-slate-400 mb-4 text-sm">Do 3 Rounds. Hold each for 90s.</p>
-               <Checklist
-                   items={COOLDOWN.map(i => ({...i, note: "Hold 90s. Deep breathing."}))}
-                   onComplete={() => setPhase('cooldown')}
-               />
-           </div>
+        <ExerciseDisplay
+            exercise={recoveryExercise}
+            currentRound={currentRound}
+            totalRounds={3} // Hardcoded 3 rounds for recovery
+            side={currentSide}
+            onComplete={() => handleExerciseComplete(COOLDOWN, () => {
+                 // End of Round
+                 if (currentRound < 3) {
+                     // No rest between rounds for recovery? Or maybe small rest?
+                     // Let's just loop.
+                     setCurrentRound(prev => prev + 1);
+                     setCurrentExerciseIdx(0);
+                     playStartBeep();
+                 } else {
+                     setPhase('cooldown');
+                     setCurrentExerciseIdx(0);
+                     setCurrentRound(1);
+                 }
+            })}
+            onPrev={() => handlePrevExercise(COOLDOWN, () => {
+                 if (currentRound > 1) {
+                     setCurrentRound(prev => prev - 1);
+                     setCurrentExerciseIdx(COOLDOWN.length - 1);
+                     const prevEx = COOLDOWN[COOLDOWN.length - 1];
+                     if(prevEx.isUnilateral) setCurrentSide('Right');
+                 } else {
+                     setPhase('warmup');
+                     setCurrentExerciseIdx(WARMUP.length - 1);
+                 }
+            })}
+            showBack={true}
+            onCancel={onCancel}
+        />
        );
   }
 
@@ -409,6 +493,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
             exercise={exercise}
             currentRound={currentRound}
             totalRounds={dayData.rounds}
+            side={currentSide}
             onComplete={() => handleExerciseComplete(exercises, handleCircuitComplete)}
             onPrev={() => handlePrevExercise(exercises, handleCircuitPrev)}
             showBack={true}
@@ -442,9 +527,14 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
        return (
         <ExerciseDisplay
             exercise={exercise}
+            side={currentSide}
             onComplete={() => handleExerciseComplete(COOLDOWN, onComplete)}
             onPrev={() => handlePrevExercise(COOLDOWN, () => {
-                if (isRecoveryDay) setPhase('recovery_main'); // or correct prev phase
+                if (isRecoveryDay) {
+                     setPhase('recovery_main');
+                     setCurrentExerciseIdx(COOLDOWN.length - 1); // Go back to end of recovery circuit
+                     // Ideally set round to 3, but simplistic logic for now
+                }
                 else setPhase('finisher');
             })}
             showBack={true}
