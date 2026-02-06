@@ -11,7 +11,8 @@ import { playStartBeep, playStopBeep, playCountdownBeep } from '../utils/audio';
 import { hapticStart, hapticStop } from '../utils/haptics';
 import { useWakeLock } from '../hooks/useWakeLock';
 
-const Timer = ({ duration, onComplete, autoStart = false, label = "Work" }) => {
+// Hook for Timer Logic
+const useTimer = (duration, onComplete, autoStart = false) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isActive, setIsActive] = useState(autoStart);
 
@@ -24,9 +25,6 @@ const Timer = ({ duration, onComplete, autoStart = false, label = "Work" }) => {
           if (newVal <= 3 && newVal > 0) playCountdownBeep();
           if (newVal <= 0) {
              clearInterval(interval);
-             // Use setTimeout to defer state update and callback to avoid sync state update in effect issues if this was triggered differently
-             // But here we are in a callback, so it's fine.
-             // However, to strictly satisfy the linter warning about effects if logic was different:
              setTimeout(() => {
                 setIsActive(false);
                 onComplete && onComplete();
@@ -38,45 +36,35 @@ const Timer = ({ duration, onComplete, autoStart = false, label = "Work" }) => {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isActive, timeLeft, onComplete]); // timeLeft in dep array causes re-setup every second, which works but is slightly inefficient. Better to remove it if logic allows, but 'timeLeft > 0' check needs it.
-  // Ideally, refactor to not depend on timeLeft in effect deps, but for now this fixes the sync setState error by moving completion logic inside the interval callback.
+  }, [isActive, timeLeft, onComplete]);
 
   const toggle = () => setIsActive(!isActive);
   const reset = () => { setIsActive(false); setTimeLeft(duration); };
 
-  const progress = ((duration - timeLeft) / duration) * 100;
+  return { timeLeft, isActive, toggle, reset, setTimeLeft };
+};
 
+const TimerVisual = ({ timeLeft, duration, label }) => {
+  const progress = duration > 0 ? ((duration - timeLeft) / duration) * 100 : 0;
   const isRest = label.toLowerCase().includes('rest') || label.toLowerCase().includes('recover');
   const colorClass = isRest ? "text-blue-400" : "text-green-400";
 
   return (
-    <div className="flex flex-col items-center w-full mb-6">
-      <div className="relative w-48 h-48 flex items-center justify-center mb-4">
-         <div
-            className="absolute inset-0 rounded-full border-4 border-slate-800"
-            style={{
-                background: `radial-gradient(closest-side, #020617 79%, transparent 80% 100%), conic-gradient(${isRest ? '#3b82f6' : '#22c55e'} ${progress}%, #1e293b 0)`
-            }}
-         />
-         <div className="relative z-10 text-center">
-             <div className="text-5xl font-bold font-mono text-white">
-                 {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
-             </div>
-             <div className={clsx("text-sm font-bold uppercase tracking-widest", colorClass)}>
-                 {label}
-             </div>
-         </div>
-      </div>
-
-      <div className="flex gap-4 w-full">
-         <button onClick={toggle} className="flex-1 btn-primary py-4">
-            {isActive ? <Pause /> : <Play />}
-            {isActive ? "Pause" : "Start"}
-         </button>
-         <button onClick={reset} className="btn-secondary w-auto px-4">
-             <RotateCcw />
-         </button>
-      </div>
+    <div className="relative w-48 h-48 flex items-center justify-center mb-4">
+       <div
+          className="absolute inset-0 rounded-full border-4 border-slate-800"
+          style={{
+              background: `radial-gradient(closest-side, #020617 79%, transparent 80% 100%), conic-gradient(${isRest ? '#3b82f6' : '#22c55e'} ${progress}%, #1e293b 0)`
+          }}
+       />
+       <div className="relative z-10 text-center">
+           <div className="text-5xl font-bold font-mono text-white">
+               {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+           </div>
+           <div className={clsx("text-sm font-bold uppercase tracking-widest", colorClass)}>
+               {label}
+           </div>
+       </div>
     </div>
   );
 };
@@ -143,83 +131,121 @@ const ExerciseDisplay = ({
   onCancel
 }) => {
     const [showSafety, setShowSafety] = useState(false);
+    const [videoError, setVideoError] = useState(false);
+
+    // Timer Logic Lifted
+    const { timeLeft, isActive, toggle, reset } = useTimer(exercise.time || 0, onComplete, false);
+
+    // Video Detection
+    const isVideo = exercise.image && (exercise.image.endsWith('.mp4') || exercise.image.endsWith('.webm'));
 
     return (
-        <div className="h-screen flex flex-col p-4 relative">
-             <div className="flex justify-between items-center mb-6">
-                 {totalRounds ? (
-                    <span className="text-slate-500 font-mono">Round {currentRound}/{totalRounds}</span>
-                 ) : (
-                    <span className="text-slate-500 font-mono capitalize">{exercise.type || 'Workout'}</span>
-                 )}
+        <div className="h-screen flex flex-col bg-slate-950">
+             {/* Header and Content Area */}
+             <div className="flex-1 overflow-y-auto p-4 pb-0">
+                 <div className="flex justify-between items-center mb-6">
+                     {totalRounds ? (
+                        <span className="text-slate-500 font-mono">Round {currentRound}/{totalRounds}</span>
+                     ) : (
+                        <span className="text-slate-500 font-mono capitalize">{exercise.type || 'Workout'}</span>
+                     )}
 
-                 <button onClick={onCancel} className="text-slate-500 text-sm">Quit</button>
-             </div>
-
-             <div className="flex-1 flex flex-col items-center text-center overflow-y-auto">
-                 <h2 className="text-3xl font-bold text-white mb-2">{exercise.name}</h2>
-
-                 <div className="bg-slate-900 rounded-lg px-4 py-2 mb-4 border border-slate-800">
-                     <span className="text-powder-400 font-bold text-lg">
-                        {exercise.time ? `${exercise.time}s` : ""}
-                        {exercise.time && exercise.weight && exercise.weight !== "Bodyweight" ? " • " : ""}
-                        {exercise.weight && exercise.weight !== "Bodyweight" ? exercise.weight : ""}
-                        {(exercise.time || (exercise.weight && exercise.weight !== "Bodyweight")) && exercise.reps ? " • " : ""}
-                        {exercise.reps ? exercise.reps : ""}
-                     </span>
+                     <button onClick={onCancel} className="text-slate-500 text-sm">Quit</button>
                  </div>
 
-                {/* Image Placeholder */}
-                {exercise.image && (
-                    <div className="w-full max-w-xs aspect-video bg-slate-800 rounded-lg mb-6 overflow-hidden border border-slate-700 flex items-center justify-center">
-                        <img
-                            src={`/images/${exercise.image}`}
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = "/images/PlaceHolder.gif";
-                            }}
-                            alt={exercise.name}
-                            className="w-full h-full object-cover"
-                        />
+                 <div className="flex flex-col items-center text-center">
+                     <h2 className="text-3xl font-bold text-white mb-2">{exercise.name}</h2>
+
+                     <div className="bg-slate-900 rounded-lg px-4 py-2 mb-4 border border-slate-800">
+                         <span className="text-powder-400 font-bold text-lg">
+                            {exercise.time ? `${exercise.time}s` : ""}
+                            {exercise.time && exercise.weight && exercise.weight !== "Bodyweight" ? " • " : ""}
+                            {exercise.weight && exercise.weight !== "Bodyweight" ? exercise.weight : ""}
+                            {(exercise.time || (exercise.weight && exercise.weight !== "Bodyweight")) && exercise.reps ? " • " : ""}
+                            {exercise.reps ? exercise.reps : ""}
+                         </span>
+                     </div>
+
+                    {/* Media Display */}
+                    {exercise.image && (
+                        <div className="w-full max-w-xs aspect-video bg-slate-800 rounded-lg mb-6 overflow-hidden border border-slate-700 flex items-center justify-center relative">
+                            {isVideo && !videoError ? (
+                                <video
+                                    src={`/images/${exercise.image}`}
+                                    poster="/images/PlaceHolder.gif"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="w-full h-full object-cover"
+                                    onError={() => setVideoError(true)}
+                                />
+                            ) : (
+                                <img
+                                    src={videoError ? "/images/PlaceHolder.gif" : `/images/${exercise.image}`}
+                                    onError={(e) => {
+                                        if (!videoError) {
+                                            e.target.onerror = null;
+                                            e.target.src = "/images/PlaceHolder.gif";
+                                        }
+                                    }}
+                                    alt={exercise.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            )}
+                        </div>
+                    )}
+
+                     <p className="text-slate-300 text-lg mb-8 px-4">{exercise.instruction}</p>
+
+                     {exercise.time ? (
+                         <div className="flex flex-col items-center w-full mb-6">
+                            <TimerVisual timeLeft={timeLeft} duration={exercise.time} label={exercise.type === 'warmup' ? "Warmup" : "Work"} />
+                         </div>
+                     ) : (
+                         <div className="w-full h-12"></div>
+                     )}
+                 </div>
+             </div>
+
+            {/* Fixed Footer for Controls */}
+            <div className="shrink-0 p-4 bg-slate-950 border-t border-slate-800 z-10 flex flex-col gap-4">
+                {exercise.time ? (
+                    <div className="flex gap-4 w-full">
+                         <button onClick={toggle} className="flex-1 btn-primary py-4">
+                            {isActive ? <Pause /> : <Play />}
+                            {isActive ? "Pause" : "Start"}
+                         </button>
+                         <button onClick={reset} className="btn-secondary w-auto px-4">
+                             <RotateCcw />
+                         </button>
                     </div>
-                )}
-
-                 <p className="text-slate-300 text-lg mb-8 px-4">{exercise.instruction}</p>
-
-                 {exercise.time ? (
-                     <Timer
-                        key={exercise.name} // Force remount on exercise change to reset timer state
-                        duration={exercise.time}
-                        label={exercise.type === 'warmup' ? "Warmup" : "Work"}
-                        onComplete={onComplete}
-                        autoStart={false} // Or true if desired, but default to false to let user start
-                     />
-                 ) : (
+                ) : (
                      <button
                         onClick={onComplete}
-                        className="btn-primary py-8 text-xl w-full"
+                        className="btn-primary py-4 text-xl w-full"
                      >
                         <CheckCircle /> Done
                      </button>
-                 )}
-             </div>
-
-            <div className="flex gap-4 mt-auto mb-4">
-                {showBack && (
-                    <button
-                        onClick={onPrev}
-                        className="btn-secondary w-16 flex items-center justify-center"
-                    >
-                        <ChevronLeft />
-                    </button>
                 )}
 
-                <button
-                    onClick={() => setShowSafety(true)}
-                    className="flex-1 flex items-center justify-center gap-2 text-red-400 font-bold p-4 bg-red-900/20 border border-red-900/50 rounded-lg"
-                >
-                    <ShieldAlert /> Safety
-                </button>
+                <div className="flex gap-4">
+                    {showBack && (
+                        <button
+                            onClick={onPrev}
+                            className="btn-secondary w-16 flex items-center justify-center"
+                        >
+                            <ChevronLeft />
+                        </button>
+                    )}
+
+                    <button
+                        onClick={() => setShowSafety(true)}
+                        className="flex-1 flex items-center justify-center gap-2 text-red-400 font-bold p-4 bg-red-900/20 border border-red-900/50 rounded-lg"
+                    >
+                        <ShieldAlert /> Safety
+                    </button>
+                </div>
             </div>
 
              {showSafety && (
@@ -240,6 +266,46 @@ const ExerciseDisplay = ({
     );
 }
 
+const RestDisplay = ({ restTime, currentRound, onComplete, onGoBack }) => {
+    const { timeLeft, isActive, toggle, reset } = useTimer(restTime, onComplete, true);
+
+    return (
+      <div className="h-screen flex flex-col bg-slate-950">
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+              <h2 className="text-2xl font-bold text-white mb-8">Rest Between Rounds</h2>
+              <TimerVisual timeLeft={timeLeft} duration={restTime} label="Recover" />
+              <div className="mt-8 text-center">
+                  <p className="text-slate-500 text-sm">Next Round:</p>
+                  <p className="text-xl text-white font-bold">Round {currentRound + 1}</p>
+              </div>
+          </div>
+
+          <div className="shrink-0 p-4 bg-slate-950 border-t border-slate-800 z-10 flex flex-col gap-4">
+              <div className="flex gap-4 w-full">
+                  <button onClick={toggle} className="flex-1 btn-primary py-4">
+                      {isActive ? <Pause /> : <Play />}
+                      {isActive ? "Pause" : "Resume"}
+                  </button>
+                   <button onClick={reset} className="btn-secondary w-auto px-4">
+                       <RotateCcw />
+                   </button>
+              </div>
+
+              <button onClick={onComplete} className="btn-secondary w-full py-4 text-white font-bold">
+                  Skip Rest
+              </button>
+
+              <button
+                onClick={onGoBack}
+                className="text-slate-500 underline text-sm py-2"
+              >
+                  Go Back
+              </button>
+          </div>
+      </div>
+    );
+};
+
 const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   const [phase, setPhase] = useState('warmup');
   const [currentRound, setCurrentRound] = useState(1);
@@ -254,7 +320,6 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   const isRestDay = dayData.type === 'rest';
   const isRecoveryDay = dayData.type === 'recovery';
 
-  // Request Wake Lock on mount
   useEffect(() => {
     requestWakeLock();
   }, [requestWakeLock]);
@@ -262,13 +327,11 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
 
   const handleExerciseComplete = (exerciseList, nextPhaseCallback) => {
       playStopBeep();
-
       const isLastExercise = currentExerciseIdx >= exerciseList.length - 1;
 
       if (isLastExercise) {
          nextPhaseCallback();
       } else {
-          // Next Exercise
           setCurrentExerciseIdx(prev => prev + 1);
           playStartBeep();
       }
@@ -278,17 +341,14 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
       if (currentExerciseIdx > 0) {
           setCurrentExerciseIdx(prev => prev - 1);
       } else {
-          // If first exercise of list, delegate to callback (e.g. go to previous round or phase)
           prevPhaseCallback && prevPhaseCallback();
       }
   };
 
   const handleCircuitComplete = () => {
-       // End of Round or Circuit
        if (currentRound < dayData.rounds) {
-          setIsResting(true); // Trigger Round Rest
+          setIsResting(true);
        } else {
-          // Workout Complete (to finisher)
           setPhase('finisher');
           setCurrentExerciseIdx(0);
           setCurrentRound(1);
@@ -297,11 +357,9 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
 
   const handleCircuitPrev = () => {
       if (currentRound > 1) {
-          // Go back to previous round
           setCurrentRound(prev => prev - 1);
-          setCurrentExerciseIdx(exercises.length - 1); // Last exercise of prev round
+          setCurrentExerciseIdx(exercises.length - 1);
       } else {
-          // Back to Warmup
           setPhase('warmup');
           setCurrentExerciseIdx(WARMUP.length - 1);
       }
@@ -311,8 +369,6 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
       playStartBeep();
       hapticStart();
       setIsResting(false);
-
-      // Start Next Round
       setCurrentRound(prev => prev + 1);
       setCurrentExerciseIdx(0);
   };
@@ -334,6 +390,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
       const exercise = WARMUP[currentExerciseIdx];
       return (
         <ExerciseDisplay
+            key={`warmup-${currentExerciseIdx}`}
             exercise={exercise}
             onComplete={() => handleExerciseComplete(WARMUP, () => {
                  if (isRecoveryDay) {
@@ -344,7 +401,7 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
                      setCurrentExerciseIdx(0);
                  }
             })}
-            onPrev={() => handlePrevExercise(WARMUP, null)} // No going back before warmup for now
+            onPrev={() => handlePrevExercise(WARMUP, null)}
             showBack={currentExerciseIdx > 0}
             onCancel={onCancel}
         />
@@ -374,30 +431,18 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
 
       if (isResting) {
           return (
-              <div className="h-screen flex flex-col items-center justify-center p-6">
-                  <h2 className="text-2xl font-bold text-white mb-8">Rest Between Rounds</h2>
-                  <Timer
-                    duration={restTime}
-                    label="Recover"
-                    autoStart={true}
-                    onComplete={handleRestComplete}
-                  />
-                  <div className="mt-8 text-center">
-                      <p className="text-slate-500 text-sm">Next Round:</p>
-                      <p className="text-xl text-white font-bold">Round {currentRound + 1}</p>
-                      <button
-                        onClick={() => { setIsResting(false); setCurrentRound(prev => prev); setCurrentExerciseIdx(exercises.length - 1); }}
-                        className="mt-4 text-slate-500 underline text-sm"
-                      >
-                          Go Back
-                      </button>
-                  </div>
-              </div>
+              <RestDisplay
+                 restTime={restTime}
+                 currentRound={currentRound}
+                 onComplete={handleRestComplete}
+                 onGoBack={() => { setIsResting(false); setCurrentRound(prev => prev); setCurrentExerciseIdx(exercises.length - 1); }}
+              />
           );
       }
 
       return (
         <ExerciseDisplay
+            key={`circuit-${currentRound}-${currentExerciseIdx}`}
             exercise={exercise}
             currentRound={currentRound}
             totalRounds={dayData.rounds}
@@ -423,20 +468,14 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   }
 
   if (phase === 'cooldown') {
-       // Convert Cooldown to linear flow too?
-       // "treat timebased warmup UI like it is the exercise" - user specifically mentioned Warmup.
-       // But consistency suggests Cooldown should also be consistent.
-       // However, Cooldown is usually a list you just check off.
-       // Let's check the COOLDOWN data structure update. I added `type: 'cooldown'` and `time`.
-       // So I should probably use the linear player for Cooldown too.
-
        const exercise = COOLDOWN[currentExerciseIdx];
        return (
         <ExerciseDisplay
+            key={`cooldown-${currentExerciseIdx}`}
             exercise={exercise}
             onComplete={() => handleExerciseComplete(COOLDOWN, onComplete)}
             onPrev={() => handlePrevExercise(COOLDOWN, () => {
-                if (isRecoveryDay) setPhase('recovery_main'); // or correct prev phase
+                if (isRecoveryDay) setPhase('recovery_main');
                 else setPhase('finisher');
             })}
             showBack={true}
@@ -463,9 +502,7 @@ const TabataPlayer = ({ onComplete }) => {
                    if (newVal <= 3 && newVal > 0) playCountdownBeep();
 
                    if (newVal <= 0) {
-                        // Timer finished
                         clearInterval(interval);
-                        // Defer logic to avoid render cycle issues
                         setTimeout(() => {
                             playStopBeep();
                             hapticStop();
@@ -507,9 +544,15 @@ const TabataPlayer = ({ onComplete }) => {
 
             <button
                 onClick={() => setIsActive(!isActive)}
-                className="btn-primary"
+                className="btn-primary mb-4 w-full"
             >
                 {isActive ? "Pause" : "Start Tabata"}
+            </button>
+            <button
+                onClick={onComplete}
+                className="btn-secondary w-full"
+            >
+                Skip Finisher
             </button>
         </div>
     );
