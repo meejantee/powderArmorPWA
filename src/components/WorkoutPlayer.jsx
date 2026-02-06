@@ -140,9 +140,9 @@ const ExerciseDisplay = ({
     const isVideo = exercise.image && (exercise.image.endsWith('.mp4') || exercise.image.endsWith('.webm'));
 
     return (
-        <div className="h-screen flex flex-col bg-slate-950">
-             {/* Header and Content Area */}
-             <div className="flex-1 overflow-y-auto p-4 pb-0">
+        <div className="h-screen w-full relative overflow-hidden bg-slate-950 flex flex-col">
+             {/* Header and Content Area - Scrollable */}
+             <div className="flex-1 overflow-y-auto pb-48 w-full p-4">
                  <div className="flex justify-between items-center mb-6">
                      {totalRounds ? (
                         <span className="text-slate-500 font-mono">Round {currentRound}/{totalRounds}</span>
@@ -208,8 +208,8 @@ const ExerciseDisplay = ({
                  </div>
              </div>
 
-            {/* Fixed Footer for Controls */}
-            <div className="shrink-0 p-4 bg-slate-950 border-t border-slate-800 z-10 flex flex-col gap-4">
+            {/* Fixed Footer for Controls - Absolutely Fixed */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-950 border-t border-slate-800 z-50 flex flex-col gap-3 shadow-2xl">
                 {exercise.time ? (
                     <div className="flex gap-4 w-full">
                          <button onClick={toggle} className="flex-1 btn-primary py-4">
@@ -249,7 +249,7 @@ const ExerciseDisplay = ({
             </div>
 
              {showSafety && (
-                 <div className="absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-center p-8 text-center">
+                 <div className="fixed inset-0 bg-slate-950/95 z-[60] flex flex-col items-center justify-center p-8 text-center">
                      <AlertTriangle className="w-20 h-20 text-red-500 mb-6" />
                      <h3 className="text-3xl font-bold text-white mb-4">Safety First</h3>
                      <ul className="text-left space-y-4 text-lg text-slate-300 mb-8">
@@ -270,8 +270,8 @@ const RestDisplay = ({ restTime, currentRound, onComplete, onGoBack }) => {
     const { timeLeft, isActive, toggle, reset } = useTimer(restTime, onComplete, true);
 
     return (
-      <div className="h-screen flex flex-col bg-slate-950">
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+      <div className="h-screen w-full relative overflow-hidden bg-slate-950 flex flex-col">
+          <div className="flex-1 overflow-y-auto pb-48 flex flex-col items-center justify-center p-6 text-center">
               <h2 className="text-2xl font-bold text-white mb-8">Rest Between Rounds</h2>
               <TimerVisual timeLeft={timeLeft} duration={restTime} label="Recover" />
               <div className="mt-8 text-center">
@@ -280,7 +280,7 @@ const RestDisplay = ({ restTime, currentRound, onComplete, onGoBack }) => {
               </div>
           </div>
 
-          <div className="shrink-0 p-4 bg-slate-950 border-t border-slate-800 z-10 flex flex-col gap-4">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-950 border-t border-slate-800 z-50 flex flex-col gap-3 shadow-2xl">
               <div className="flex gap-4 w-full">
                   <button onClick={toggle} className="flex-1 btn-primary py-4">
                       {isActive ? <Pause /> : <Play />}
@@ -303,6 +303,81 @@ const RestDisplay = ({ restTime, currentRound, onComplete, onGoBack }) => {
               </button>
           </div>
       </div>
+    );
+};
+
+const TabataPlayer = ({ onComplete }) => {
+    const [round, setRound] = useState(1);
+    const [isWork, setIsWork] = useState(true);
+    const [timeLeft, setTimeLeft] = useState(20);
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        let interval = null;
+        if (isActive && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft(t => {
+                   const newVal = t - 1;
+                   if (newVal <= 3 && newVal > 0) playCountdownBeep();
+
+                   if (newVal <= 0) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            playStopBeep();
+                            hapticStop();
+                            if (isWork) {
+                                setIsWork(false);
+                                setTimeLeft(10);
+                            } else {
+                                if (round < 8) {
+                                    setRound(r => r + 1);
+                                    setIsWork(true);
+                                    setTimeLeft(20);
+                                    playStartBeep();
+                                    hapticStart();
+                                } else {
+                                    setIsActive(false);
+                                    onComplete();
+                                }
+                            }
+                        }, 0);
+                        return 0;
+                   }
+                   return newVal;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [isActive, timeLeft, isWork, round, onComplete]);
+
+    return (
+        <div className="h-full w-full flex flex-col">
+             <div className="flex-1 flex flex-col items-center justify-center pb-32">
+                 <div className={clsx(
+                    "w-64 h-64 rounded-full flex flex-col items-center justify-center border-8 mb-8 transition-colors duration-300",
+                    isWork ? "border-red-500 bg-red-900/20" : "border-blue-500 bg-blue-900/20"
+                )}>
+                    <span className="text-6xl font-bold font-mono text-white">{timeLeft}</span>
+                    <span className="text-xl font-bold uppercase">{isWork ? "WORK" : "REST"}</span>
+                    <span className="text-sm mt-2 text-slate-400">Round {round}/8</span>
+                </div>
+             </div>
+
+             <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-950 border-t border-slate-800 z-50 flex flex-col gap-3 shadow-2xl">
+                <button
+                    onClick={() => setIsActive(!isActive)}
+                    className="btn-primary py-4 w-full"
+                >
+                    {isActive ? "Pause" : "Start Tabata"}
+                </button>
+                <button
+                    onClick={onComplete}
+                    className="btn-secondary w-full py-4"
+                >
+                    Skip Finisher
+                </button>
+            </div>
+        </div>
     );
 };
 
@@ -456,12 +531,12 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
 
   if (phase === 'finisher') {
       return (
-          <div className="h-screen flex flex-col items-center p-4 text-center">
-               <div className="w-full flex justify-start mb-4">
+          <div className="h-screen w-full relative overflow-hidden bg-slate-950 flex flex-col items-center text-center">
+               <div className="w-full flex justify-start p-4">
                   <button onClick={() => { setPhase('circuit'); setCurrentRound(dayData.rounds); setCurrentExerciseIdx(exercises.length - 1); }} className="text-slate-500"><ChevronLeft /></button>
                </div>
               <h2 className="text-2xl font-bold text-white mb-2">Cardio Finisher</h2>
-              <p className="text-slate-400 mb-8">Tabata: 20s Work / 10s Rest x 8 Rounds</p>
+              <p className="text-slate-400">Tabata: 20s Work / 10s Rest x 8 Rounds</p>
                <TabataPlayer onComplete={() => { setPhase('cooldown'); setCurrentExerciseIdx(0); }} />
           </div>
       );
@@ -485,77 +560,6 @@ const WorkoutPlayer = ({ dayNumber, stance, onComplete, onCancel }) => {
   }
 
   return null;
-};
-
-const TabataPlayer = ({ onComplete }) => {
-    const [round, setRound] = useState(1);
-    const [isWork, setIsWork] = useState(true);
-    const [timeLeft, setTimeLeft] = useState(20);
-    const [isActive, setIsActive] = useState(false);
-
-    useEffect(() => {
-        let interval = null;
-        if (isActive && timeLeft > 0) {
-            interval = setInterval(() => {
-                setTimeLeft(t => {
-                   const newVal = t - 1;
-                   if (newVal <= 3 && newVal > 0) playCountdownBeep();
-
-                   if (newVal <= 0) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            playStopBeep();
-                            hapticStop();
-                            if (isWork) {
-                                setIsWork(false);
-                                setTimeLeft(10);
-                            } else {
-                                if (round < 8) {
-                                    setRound(r => r + 1);
-                                    setIsWork(true);
-                                    setTimeLeft(20);
-                                    playStartBeep();
-                                    hapticStart();
-                                } else {
-                                    setIsActive(false);
-                                    onComplete();
-                                }
-                            }
-                        }, 0);
-                        return 0;
-                   }
-                   return newVal;
-                });
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [isActive, timeLeft, isWork, round, onComplete]);
-
-    return (
-        <div className="flex flex-col items-center w-full">
-            <div className={clsx(
-                "w-64 h-64 rounded-full flex flex-col items-center justify-center border-8 mb-8 transition-colors duration-300",
-                isWork ? "border-red-500 bg-red-900/20" : "border-blue-500 bg-blue-900/20"
-            )}>
-                <span className="text-6xl font-bold font-mono text-white">{timeLeft}</span>
-                <span className="text-xl font-bold uppercase">{isWork ? "WORK" : "REST"}</span>
-                <span className="text-sm mt-2 text-slate-400">Round {round}/8</span>
-            </div>
-
-            <button
-                onClick={() => setIsActive(!isActive)}
-                className="btn-primary mb-4 w-full"
-            >
-                {isActive ? "Pause" : "Start Tabata"}
-            </button>
-            <button
-                onClick={onComplete}
-                className="btn-secondary w-full"
-            >
-                Skip Finisher
-            </button>
-        </div>
-    );
 };
 
 export default WorkoutPlayer;
